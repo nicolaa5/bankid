@@ -1,10 +1,10 @@
-package api 
+package cfg 
 
 type Config struct {
 	// The BankID API endpoint
 	URL string
 
-	// Your organization's certificate signed by a trusted certificate authority (.p12).
+	// Your organization's certificate signed by a trusted certificate authority (cert has .p12 extension).
 	// Provided by the bank (the trusted CA) that you sign an agreement with, see https://www.bankid.com/en/foretag/kontakt-foeretag
 	SSLCertificate []byte
 
