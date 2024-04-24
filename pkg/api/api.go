@@ -1,26 +1,34 @@
 package api
 
 import (
-	"github.com/nicolaa5/bankid/internal/request"
+	"fmt"
+
+	"github.com/nicolaa5/bankid/internal/req"
 	"github.com/nicolaa5/bankid/pkg/cfg"
 )
 
+const bankIDURL = "https://appapi2.bankid.com/rp/v6.0"
+
 type BankID interface {
 	// Initiates an authentication order. Use the collect method to query the status of the order. If the request is successful the response includes:
-	// - orderRef
-	// - autoStartToken
-	// - qrStartToken
-	// - qrStartSecret
-	Auth(personnummer string) error
+	// 	- orderRef
+	// 	- autoStartToken
+	// 	- qrStartToken
+	// 	- qrStartSecret
+	Auth(endUserIPAdress string) error
 
-	// sign
-	Sign() error
+	// Initiates an signing order. Use the collect method to query the status of the order. If the request is successful the response includes:
+	// 	- orderRef
+	// 	- autoStartToken
+	// 	- qrStartToken
+	// 	- qrStartSecret
+	Sign(endUserIPAdress string) error
 
 	// phone/auth
-	PhoneAuth() error
+	PhoneAuth(personnummer string) error
 
 	// phone/sign
-	PhoneSign() error
+	PhoneSign(personnummer string) error
 
 	// collect
 	Collect(orderNummer string) error
@@ -30,45 +38,48 @@ type BankID interface {
 }
 
 type bankid struct {
-	config cfg.Config
+	config  cfg.Config
+	request req.Client
 }
-
-func New(config cfg.Config) (BankID, error) {
-
-	request.New(config)
-
-	return &bankid{
-		config: config,
-	}, nil
-}
-
 
 // Auth implements BankID.
-func (b *bankid) Auth(personnummer string) error {
+func (*bankid) Auth(endUserIPAdress string) error {
 	panic("unimplemented")
 }
 
 // Cancel implements BankID.
-func (b *bankid) Cancel(orderNummer string) error {
+func (*bankid) Cancel(orderNummer string) error {
 	panic("unimplemented")
 }
 
 // Collect implements BankID.
-func (b *bankid) Collect(orderNummer string) error {
+func (*bankid) Collect(orderNummer string) error {
 	panic("unimplemented")
 }
 
 // PhoneAuth implements BankID.
-func (b *bankid) PhoneAuth() error {
+func (*bankid) PhoneAuth(personnummer string) error {
 	panic("unimplemented")
 }
 
 // PhoneSign implements BankID.
-func (b *bankid) PhoneSign() error {
+func (*bankid) PhoneSign(personnummer string) error {
 	panic("unimplemented")
 }
 
 // Sign implements BankID.
-func (b *bankid) Sign() error {
+func (*bankid) Sign(endUserIPAdress string) error {
 	panic("unimplemented")
+}
+
+func New(config cfg.Config) (BankID, error) {
+
+	r, err := req.New(config)
+	if err != nil {
+		return nil, fmt.Errorf("error initializing: %w", err)
+	}
+
+	return &bankid{
+		config: config,
+	}, nil
 }
