@@ -1,6 +1,6 @@
 package response
 
-type Collect struct {
+type CollectResponse struct {
 	OrderRef       string         `json:"orderRef"`
 	Status         Status         `json:"status"`
 	HintCode       HintCode       `json:"hintCode"`
