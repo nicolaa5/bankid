@@ -5,13 +5,14 @@ import (
 	"crypto"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/nicolaa5/bankid/internal/validate"
 	"github.com/nicolaa5/bankid/pkg/cfg"
+	"github.com/nicolaa5/bankid/pkg/request"
+	"github.com/nicolaa5/bankid/pkg/response"
 	"software.sslmate.com/src/go-pkcs12"
 )
 
@@ -21,25 +22,41 @@ import (
 //   - HTTP header 'Content-Type' must be set to 'application/json'.
 //   - The parameters including the leading and ending curly bracket is in the body.
 type Client struct {
-	urlBase string
-	client  *http.Client
+	UrlBase string
+	Client  *http.Client
 }
 
-func (r *Client) Request(path string, body []byte) (*http.Response, error) {
-	body, err := json.Marshal(body)
+type Parameters struct {
+	Path    string
+	Client *Client
+	Body   request.RequestBody
+}
+
+// Request sends a request to the BankID API and returns the response.
+func Request[T response.ResponseBody](p Parameters) (*T, error) {
+	b, err := p.Body.Marshal()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling body: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s", r.urlBase, path), bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", p., bytes.NewBuffer(b))
 	if err != nil {
+
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	
-	req.Header.Set("Content-Type", "application/json")
-	return r.client.Do(req)
-}
 
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := c.Client.Do(req)
+	defer res.Body.Close()
+
+	switch e := err.(type) {
+	case nil:
+		// All good
+	default:
+		return nil, fmt.Errorf("internal error request to bankid: %w", err)
+	}
+}
 
 func New(config cfg.Config) (*Client, error) {
 	if err := validate.Config(&config); err != nil {
@@ -84,7 +101,7 @@ func New(config cfg.Config) (*Client, error) {
 	}
 
 	return &Client{
-		urlBase: config.URL,
-		client:  client,
+		UrlBase: config.URL,
+		Client:  client,
 	}, nil
 }

@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	BankidURL     = "https://appapi2.bankid.com/rp/v6.0"
-	BankidTestUrl = "https://appapi2.test.bankid.com/rp/v6.0"
+	BankIDURL     = "https://appapi2.bankid.com/rp/v6.0"
+	BankIDTestUrl = "https://appapi2.test.bankid.com/rp/v6.0"
 )
 
 type BankID interface {
@@ -21,7 +21,7 @@ type BankID interface {
 	// 	- autoStartToken
 	// 	- qrStartToken
 	// 	- qrStartSecret
-	Auth(request request.AuthRequest) (response response.AuthResponse, err error)
+	Auth(request request.AuthRequest) (*response.AuthResponse, error)
 
 	// Initiates an signing order.
 	// Use the collect method to query the status of the order. If the request is successful the response includes:
@@ -29,28 +29,27 @@ type BankID interface {
 	// 	- autoStartToken
 	// 	- qrStartToken
 	// 	- qrStartSecret
-	Sign(request request.SignRequest) (response response.SignResponse, err error)
+	Sign(request request.SignRequest) (*response.SignResponse, error)
 
 	// Initiates an authentication order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
-	PhoneAuth(request request.PhoneAuthRequest) (response response.PhoneAuthResponse, err error)
+	PhoneAuth(request request.PhoneAuthRequest) (*response.PhoneAuthResponse, error)
 
-	// Initiates an authentication order when the user is talking to the RP over the phone.
+	// Initiates an signing order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
-	PhoneSign(request request.PhoneSignRequest) (response response.PhoneSignResponse, err error)
+	PhoneSign(request request.PhoneSignRequest) (*response.PhoneSignResponse, error)
 
 	// Collects the result of a sign or auth order using orderRef as reference.
 	// RP should keep on calling collect every two seconds if status is pending.
 	// RP must abort if status indicates failed. The user identity is returned when complete.
-	Collect(request request.CollectRequest) (response response.CollectResponse, err error)
+	Collect(request request.CollectRequest) (*response.CollectResponse, error)
 
 	// Cancels an ongoing sign or auth order.
 	// This is typically used if the user cancels the order in your service or app.
-	Cancel(request request.CancelRequest) (response response.CancelResponse, err error)
+	Cancel(request request.CancelRequest) (*response.CancelResponse, error)
 }
 
 type bankid struct {
-	config cfg.Config
 	client *client.Client
 }
 
@@ -61,38 +60,60 @@ func New(config cfg.Config) (BankID, error) {
 	}
 
 	return &bankid{
-		config: config,
 		client: c,
 	}, nil
 }
 
-
-// Auth implements BankID.
-func (b *bankid) Auth(request request.AuthRequest) (response response.AuthResponse, err error) {
-	b.client.Request()
+// Initiates an authentication order. Use the collect method to query the status of the order.
+func (b *bankid) Auth(request request.AuthRequest) (*response.AuthResponse, error) {
+	return client.Request[response.AuthResponse](client.Parameters{
+		Path:   "/auth",
+		Client: b.client,
+		Body:   request,
+	})
 }
 
-// Cancel implements BankID.
-func (*bankid) Cancel(request request.CancelRequest) (response response.CancelResponse, err error) {
-	panic("unimplemented")
+// Initiates an signing order. Use the collect method to query the status of the order.
+func (b *bankid) Sign(request request.SignRequest) (*response.SignResponse, error) {
+	return client.Request[response.SignResponse](client.Parameters{
+		Path:   "/sign",
+		Client: b.client,
+		Body:   request,
+	})
 }
 
-// Collect implements BankID.
-func (*bankid) Collect(request request.CollectRequest) (response response.CollectResponse, err error) {
-	panic("unimplemented")
+// Initiates an authentication order when the user is talking to the RP over the phone.
+func (b *bankid) PhoneAuth(request request.PhoneAuthRequest) (*response.PhoneAuthResponse, error) {
+	return client.Request[response.PhoneAuthResponse](client.Parameters{
+		Path:   "/cancel",
+		Client: b.client,
+		Body:   request,
+	})
 }
 
-// PhoneAuth implements BankID.
-func (*bankid) PhoneAuth(request request.PhoneAuthRequest) (response response.PhoneAuthResponse, err error) {
-	panic("unimplemented")
+// Initiates an signing order when the user is talking to the RP over the phone.
+func (b *bankid) PhoneSign(request request.PhoneSignRequest) (*response.PhoneSignResponse, error) {
+	return client.Request[response.PhoneSignResponse](client.Parameters{
+		Path:   "/phone/sign",
+		Client: b.client,
+		Body:   request,
+	})
 }
 
-// PhoneSign implements BankID.
-func (*bankid) PhoneSign(request request.PhoneSignRequest) (response response.PhoneSignResponse, err error) {
-	panic("unimplemented")
+// Collects the result of a sign or auth order using orderRef as reference.
+func (b *bankid) Collect(request request.CollectRequest) (*response.CollectResponse, error) {
+	return client.Request[response.CollectResponse](client.Parameters{
+		Path:   "/collect",
+		Client: b.client,
+		Body:   request,
+	})
 }
 
-// Sign implements BankID.
-func (*bankid) Sign(request request.SignRequest) (response response.SignResponse, err error) {
-	panic("unimplemented")
+// Cancels an ongoing sign or auth order.
+func (b *bankid) Cancel(request request.CancelRequest) (*response.CancelResponse, error) {
+	return client.Request[response.CancelResponse](client.Parameters{
+		Path:   "/cancel",
+		Client: b.client,
+		Body:   request,
+	})
 }

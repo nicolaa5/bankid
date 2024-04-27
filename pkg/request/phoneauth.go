@@ -1,5 +1,7 @@
 package request
 
+import "encoding/json"
+
 // Initiates an authentication order when the user is talking to the RP over the phone.
 // Use the collect method to query the status of the order.
 type PhoneAuthRequest struct {
@@ -26,4 +28,8 @@ type PhoneAuthRequest struct {
 	// will potentially make the text displayed to the user nicer to look at.
 	// For instructions check out https://www.bankid.com/utvecklare/guider/formatera-text
 	UserVisibleDataFormat string `json:"userVisibleDataFormat,omitempty"`
+}
+
+func (r PhoneAuthRequest) Marshal() ([]byte, error) {
+	return json.Marshal(r)
 }

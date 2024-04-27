@@ -1,5 +1,7 @@
 package response
 
+import "encoding/json"
+
 type AuthResponse struct {
 	// Used to collect the status of the order.
 	OrderRef string `json:"orderRef"`
@@ -13,4 +15,8 @@ type AuthResponse struct {
 
 	// Used to compute the animated QR code.
 	QRStartSecret string `json:"qrStartSecret"`
+}
+
+func (r AuthResponse) Unmarshal(data []byte) error {
+	return json.Unmarshal(data, &r)
 }

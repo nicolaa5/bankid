@@ -1,10 +1,16 @@
 package response
 
+import "encoding/json"
+
 type CollectResponse struct {
 	OrderRef       string         `json:"orderRef"`
 	Status         Status         `json:"status"`
 	HintCode       HintCode       `json:"hintCode"`
 	CompletionData CompletionData `json:"completionData"`
+}
+
+func (r CollectResponse) Unmarshal(data []byte) error {
+	return json.Unmarshal(data, &r)
 }
 
 type User struct {
