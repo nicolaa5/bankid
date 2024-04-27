@@ -1,15 +1,16 @@
-package req
+package client
 
 import (
 	"bytes"
 	"crypto"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
+	"github.com/nicolaa5/bankid/internal/validate"
 	"github.com/nicolaa5/bankid/pkg/cfg"
 	"software.sslmate.com/src/go-pkcs12"
 )
@@ -24,24 +25,30 @@ type Client struct {
 	client  *http.Client
 }
 
-func (*Client) New(config cfg.Config) (*Client, error) {
-
-	if config.SSLCertificate == nil && config.SSLCertificatePath != "" {
-		p12, err := os.ReadFile(config.SSLCertificatePath)
-		if err != nil {
-			return nil, fmt.Errorf("error reading .p12 file: %w", err)
-		}
-
-		config.SSLCertificate = p12
+func (r *Client) Request(path string, body []byte) (*http.Response, error) {
+	body, err := json.Marshal(body)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling body: %w", err)
 	}
 
-	if config.CACertificate == nil && config.CACertificatePath != "" {
-		ca, err := os.ReadFile(config.CACertificatePath)
-		if err != nil {
-			return nil, fmt.Errorf("error reading root certificate file: %w", err)
-		}
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s", r.urlBase, path), bytes.NewBuffer(body))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	
+	req.Header.Set("Content-Type", "application/json")
+	return r.client.Do(req)
+}
 
-		config.CACertificate = ca
+
+func New(config cfg.Config) (*Client, error) {
+	if err := validate.Config(&config); err != nil {
+		return nil, fmt.Errorf("error validating config: %w", err)
+	}
+
+	err := setCert(&config)
+	if err != nil {
+		return nil, fmt.Errorf("error setting certificate: %w", err)
 	}
 
 	// Parse the decrypted .p12 data
@@ -62,7 +69,7 @@ func (*Client) New(config cfg.Config) (*Client, error) {
 		Certificates: []tls.Certificate{
 			{
 				Certificate: [][]byte{cert.Raw},
-                PrivateKey:  privateKey.(crypto.PrivateKey),
+				PrivateKey:  privateKey.(crypto.PrivateKey),
 				Leaf:        cert,
 			},
 		},
@@ -75,17 +82,9 @@ func (*Client) New(config cfg.Config) (*Client, error) {
 			TLSClientConfig: tlsConfig,
 		},
 	}
-    
+
 	return &Client{
 		urlBase: config.URL,
 		client:  client,
 	}, nil
-}
-
-func (r *Client) req(path string, body []byte) (*http.Response, error) {
-    return r.client.Post(
-        fmt.Sprintf("%s/%s", r.urlBase, path), 
-        "application/json", 
-        bytes.NewBuffer(body),
-    )
 }
