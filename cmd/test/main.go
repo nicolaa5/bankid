@@ -1,14 +1,26 @@
 package test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/nicolaa5/bankid/pkg/api"
 	"github.com/nicolaa5/bankid/pkg/parameters"
+	"github.com/nicolaa5/bankid/pkg/request"
 	"github.com/stretchr/testify/require"
 )
 
 func TestAPI(t *testing.T) {
+
+	b, err := api.New(parameters.Parameters{
+		URL:  parameters.BankIDTestUrl,
+		Cert: parameters.NewCertFromPaths(
+			parameters.WithSSLCertificatePath("certs/client.p12"),
+			parameters.WithCACertificatePath("certs/ca.pem"),
+		),
+	})
+	require.NoError(t, err)
+	
 	for _, tt := range []struct {
 		name string
 	}{
@@ -19,18 +31,12 @@ func TestAPI(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			cert, err := parameters.NewCert(
-				parameters.WithSSLCertificate([]byte("certs/client.p12")),
-				parameters.WithCACertificate([]byte("certs/ca.pem")),
-			)
+			response, err := b.Auth(request.AuthRequest{
+				EndUserIP: "",
+			})
 			require.NoError(t, err)
 
-			config := parameters.Parameters{
-				URL: parameters.BankIDTestUrl,
-				Cert: *cert,
-			}
-
-			api.New(config)
+			fmt.Println(response.OrderRef)
 		})
 	}
 }

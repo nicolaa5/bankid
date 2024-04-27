@@ -8,6 +8,7 @@ const (
 )
 
 type Parameters struct {
+	// Required: The SSL & CA certificate for the client
 	Cert
 
 	// Optional: The URL to BankID API

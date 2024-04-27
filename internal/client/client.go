@@ -71,7 +71,7 @@ func Request[T response.ResponseBody](p Parameters) (r *T, err error) {
 			return nil, fmt.Errorf("error unmarshalling error response: %w", err)
 		}
 
-		return nil, customerrors.ParseError(e.ErrorCode)
+		return nil, customerrors.AssignError(e.ErrorCode)
 	}
 
 	err = json.Unmarshal(body, &r)
