@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nicolaa5/bankid/pkg/cfg"
+	"github.com/nicolaa5/bankid/pkg/parameters"
 )
 
-func setCert(config *cfg.Config) error {
+func readCert(config *parameters.Parameters) error {
 	if config.SSLCertificate == nil && config.SSLCertificatePath != "" {
 		p12, err := os.ReadFile(config.SSLCertificatePath)
 		if err != nil {

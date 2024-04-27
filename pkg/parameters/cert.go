@@ -1,4 +1,4 @@
-package cfg
+package parameters
 
 type Cert struct {
 	// Your organization's certificate signed by a trusted certificate authority (cert has .p12 extension).
@@ -16,6 +16,16 @@ type Cert struct {
 
 	// The path to your CACertificate
 	CACertificatePath string `json:"caCertificatePath"`
+}
+
+func NewCert(opts ...Option) (*Cert, error) {
+	config := &Cert{}
+
+	for _, opt := range opts {
+		opt(config)
+	}
+
+	return config, nil
 }
 
 type Option func(*Cert)
@@ -36,14 +46,4 @@ func WithCACertificate(cert []byte) Option {
 	return func(c *Cert) {
 		c.CACertificate = cert
 	}
-}
-
-func NewConfig(opts ...Option) (*Cert, error) {
-	config := &Cert{}
-
-	for _, opt := range opts {
-		opt(config)
-	}
-
-	return config, nil
 }

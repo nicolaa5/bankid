@@ -1,28 +1,18 @@
-package error
+package customerrors
 
 import (
 	"fmt"
 )
 
-// RPError is an error that originates from your system (Responsible Party) that must not be communicated to the enduser as a BankID error.
-type RPError struct {
-	StatusCode int
-	Message    string
-	ErrorCode  string
-}
-
-// BankIDError is an error originating from BankID's system that should be communicated to the enduser by the RP
+// BankIDError is an error returned by BankID that should be communicated to the enduser, or handled by the RP.
 type BankIDError struct {
-	StatusCode int
-	Message    string
-}
-
-func (r RPError) Error() string {
-	return fmt.Sprintf("statuscode: %d message: %s", r.StatusCode, r.Message)
+	StatusCode int `json:"statusCode"`
+	Details    string `json:"details"`
+	ErrorCode  ErrorCode `json:"errorCode"`
 }
 
 func (r BankIDError) Error() string {
-	return fmt.Sprintf("statuscode: %d message: %s", r.StatusCode, r.Message)
+	return fmt.Sprintf("errorcode: %s statuscode: %d details: %s", r.ErrorCode, r.StatusCode, r.Details)
 }
 
 const (
@@ -52,66 +42,74 @@ var (
 	// Message RFA4 should be used.
 	ErrAlreadyInProgress = BankIDError{
 		StatusCode: 208, // HTTP 208 - Already In Progress
-		Message:    RFA4,
+		Details:    RFA4,
+		ErrorCode: AlreadyInProgress,
 	}
 
 	// If an unknown errorCode is returned, RP should inform the user. Message RFA22 should be used.
 	// RP should update their implementation to support the new errorCode as soon as possible.
 	ErrUnknownErrorCode = BankIDError{
 		StatusCode: 501, // HTTP 501 - Not Implemented
-		Message:    RFA22,
+		Details:    RFA22,
+		ErrorCode:  UnknownErrorCode,
 	}
 
 	// RP must not automatically try again. This error may occur if the processing at RP or the communication is too slow.
 	// RP must inform the user. Message RFA5 should be used.
 	ErrRequestTimeout = BankIDError{
 		StatusCode: 408, // HTTP 408 - Request Timeout
-		Message:    RFA5,
+		Details:    RFA5,
+		ErrorCode:  RequestTimeout,
 	}
 
 	// RP must not automatically try again. RP must inform the user.
 	// Message RFA5 should be used.
 	ErrInternalError = BankIDError{
 		StatusCode: 500, // HTTP 500 - Internal Server Error
-		Message:    RFA5,
+		Details:    RFA5,
+		ErrorCode:  InternalError,
 	}
 
 	// RP may try again without informing the user. If this error is returned repeatedly, RP must inform the user.
 	// Message RFA5 should be used.
 	ErrMaintenance = BankIDError{
 		StatusCode: 503, // HTTP 503 - Service Unavailable
-		Message:    RFA5,
+		Details:    RFA5,
+		ErrorCode:  Maintenance,
 	}
-)
-
-var (
+	
 	// RP must not try the same request again. This is an internal error within the RP's system and must not be communicated to the user as a BankID error.
-	ErrInvalidParameters = RPError{
+	ErrInvalidParameters = BankIDError{
 		StatusCode: 400, // HTTP 400 - Bad Request
-		Message:    "Invalid parameter. Invalid use of method. Potential causes include using an orderRef that previously resulted in a completed or failed order, orderRef that is too old, using the wrong certificate, oversized content, or non-JSON bodies. Internal error within the RP's system.",
+		Details:    "Invalid parameter. Invalid use of method. Potential causes include using an orderRef that previously resulted in a completed or failed order, orderRef that is too old, using the wrong certificate, oversized content, or non-JSON bodies. Internal error within the RP's system.",
+		ErrorCode:  InvalidParameters,
 	}
 
 	// RP must not try the same request again. This is an internal error within the RP's system and must not be communicated to the user as a BankID error.
-	ErrUnauthorized = RPError{
+	ErrUnauthorized = BankIDError{
 		StatusCode: 401, // HTTP 401 - Unauthorized
-		Message:    "RP does not have access to the service. Internal error within the RP's system.",
+		Details:    "RP does not have access to the service. Internal error within the RP's system.",
+		ErrorCode:  Unauthorized,
 	}
 
 	// RP must not try the same request again. This is an internal error within the RP's system and must not be communicated to the user as a BankID error.
-	ErrNotFound = RPError{
+	ErrNotFound = BankIDError{
 		StatusCode: 404, // HTTP 404 - Not Found
-		Message:    "An erroneous URL path was used. Internal error within the RP's system.",
+		Details:    "An erroneous URL path was used. Internal error within the RP's system.",
+		ErrorCode:  NotFound,
 	}
 
 	// RP must not try the same request again. This is an internal error within the RP's system and must not be communicated to the user as a BankID error.
-	ErrMethodNotAllowed = RPError{
+	ErrMethodNotAllowed = BankIDError{
 		StatusCode: 405, // HTTP 405 - Method Not Allowed
-		Message:    "Only http method POST is allowed. Internal error within the RP's system.",
+		Details:    "Only http method POST is allowed. Internal error within the RP's system.",
+		ErrorCode:  MethodNotAllowed,
 	}
 
 	// RP must not try the same request again. This is an internal error within the RP's system and must not be communicated to the user as a BankID error.
-	ErrUnsupportedMediaType = RPError{
+	ErrUnsupportedMediaType = BankIDError{
 		StatusCode: 415, // HTTP 415 - Unsupported Media Type
-		Message:    "Adding a 'charset' parameter after 'application/json' is not allowed. Internal error within the RP's system.",
+		Details:    "Adding a 'charset' parameter after 'application/json' is not allowed. Internal error within the RP's system.",
+		ErrorCode:  UnsupportedMediaType,
 	}
 )

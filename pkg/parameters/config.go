@@ -1,21 +1,28 @@
-package cfg
+package parameters
 
 import "fmt"
 
-type Config struct {
+const (
+	BankIDURL     = "https://appapi2.bankid.com/rp/v6.0"
+	BankIDTestUrl = "https://appapi2.test.bankid.com/rp/v6.0"
+)
+
+type Parameters struct {
 	Cert
 
-	// The URL to BankID API
+	// Optional: The URL to BankID API
+	// Default: "https://appapi2.bankid.com/rp/v6.0"
 	URL string `json:"url"`
 
-	// The timeout for the request to BankID API in seconds.
+	// Optional: The timeout for the request to BankID API in seconds.
+	// Default: 5
 	Timeout int `json:"timeout"`
 }
 
-func (c Config) Validate() error {
+func (c Parameters) Validate() error {
 	if c.URL == "" {
 		// if url is not set we assume the default value
-		c.URL = "https://appapi2.bankid.com/rp/v6"
+		c.URL = BankIDURL
 	}
 
 	if c.SSLCertificate == nil && c.SSLCertificatePath == "" {

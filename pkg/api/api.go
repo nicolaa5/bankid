@@ -4,14 +4,9 @@ import (
 	"fmt"
 
 	"github.com/nicolaa5/bankid/internal/client"
-	"github.com/nicolaa5/bankid/pkg/cfg"
+	"github.com/nicolaa5/bankid/pkg/parameters"
 	"github.com/nicolaa5/bankid/pkg/request"
 	"github.com/nicolaa5/bankid/pkg/response"
-)
-
-const (
-	BankIDURL     = "https://appapi2.bankid.com/rp/v6.0"
-	BankIDTestUrl = "https://appapi2.test.bankid.com/rp/v6.0"
 )
 
 type BankID interface {
@@ -50,10 +45,10 @@ type BankID interface {
 }
 
 type bankid struct {
-	client *client.Client
+	client *client.Config
 }
 
-func New(config cfg.Config) (BankID, error) {
+func New(config parameters.Parameters) (BankID, error) {
 	c, err := client.New(config)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing client: %w", err)
@@ -68,7 +63,7 @@ func New(config cfg.Config) (BankID, error) {
 func (b *bankid) Auth(request request.AuthRequest) (*response.AuthResponse, error) {
 	return client.Request[response.AuthResponse](client.Parameters{
 		Path:   "/auth",
-		Client: b.client,
+		Config: b.client,
 		Body:   request,
 	})
 }
@@ -77,7 +72,7 @@ func (b *bankid) Auth(request request.AuthRequest) (*response.AuthResponse, erro
 func (b *bankid) Sign(request request.SignRequest) (*response.SignResponse, error) {
 	return client.Request[response.SignResponse](client.Parameters{
 		Path:   "/sign",
-		Client: b.client,
+		Config: b.client,
 		Body:   request,
 	})
 }
@@ -86,7 +81,7 @@ func (b *bankid) Sign(request request.SignRequest) (*response.SignResponse, erro
 func (b *bankid) PhoneAuth(request request.PhoneAuthRequest) (*response.PhoneAuthResponse, error) {
 	return client.Request[response.PhoneAuthResponse](client.Parameters{
 		Path:   "/cancel",
-		Client: b.client,
+		Config: b.client,
 		Body:   request,
 	})
 }
@@ -95,7 +90,7 @@ func (b *bankid) PhoneAuth(request request.PhoneAuthRequest) (*response.PhoneAut
 func (b *bankid) PhoneSign(request request.PhoneSignRequest) (*response.PhoneSignResponse, error) {
 	return client.Request[response.PhoneSignResponse](client.Parameters{
 		Path:   "/phone/sign",
-		Client: b.client,
+		Config: b.client,
 		Body:   request,
 	})
 }
@@ -104,7 +99,7 @@ func (b *bankid) PhoneSign(request request.PhoneSignRequest) (*response.PhoneSig
 func (b *bankid) Collect(request request.CollectRequest) (*response.CollectResponse, error) {
 	return client.Request[response.CollectResponse](client.Parameters{
 		Path:   "/collect",
-		Client: b.client,
+		Config: b.client,
 		Body:   request,
 	})
 }
@@ -113,7 +108,7 @@ func (b *bankid) Collect(request request.CollectRequest) (*response.CollectRespo
 func (b *bankid) Cancel(request request.CancelRequest) (*response.CancelResponse, error) {
 	return client.Request[response.CancelResponse](client.Parameters{
 		Path:   "/cancel",
-		Client: b.client,
+		Config: b.client,
 		Body:   request,
 	})
 }
