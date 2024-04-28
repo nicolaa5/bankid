@@ -6,9 +6,9 @@ import (
 
 // BankIDError is an error returned by BankID that should be communicated to the enduser, or handled by the RP.
 type BankIDError struct {
-	StatusCode int `json:"statusCode"`
-	Details    string `json:"details"`
-	ErrorCode  ErrorCode `json:"errorCode"`
+	StatusCode int `json:"statusCode,omitempty"`
+	Details    string `json:"details,omitempty"`
+	ErrorCode  ErrorCode `json:"errorCode,omitempty"`
 }
 
 func (r BankIDError) Error() string {

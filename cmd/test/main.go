@@ -12,12 +12,15 @@ import (
 
 func TestAPI(t *testing.T) {
 
+	cert, err := parameters.NewCert(
+		parameters.WithSSLCertificatePath("certs/client.p12"),
+		parameters.WithCACertificatePath("certs/ca.pem"),
+	)
+	require.NoError(t, err)
+
 	b, err := api.New(parameters.Parameters{
 		URL:  parameters.BankIDTestUrl,
-		Cert: parameters.NewCertFromPaths(
-			parameters.WithSSLCertificatePath("certs/client.p12"),
-			parameters.WithCACertificatePath("certs/ca.pem"),
-		),
+		Cert: cert,
 	})
 	require.NoError(t, err)
 	

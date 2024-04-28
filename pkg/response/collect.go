@@ -5,8 +5,8 @@ import "encoding/json"
 type CollectResponse struct {
 	OrderRef       string         `json:"orderRef"`
 	Status         Status         `json:"status"`
-	HintCode       HintCode       `json:"hintCode"`
-	CompletionData CompletionData `json:"completionData"`
+	HintCode       HintCode       `json:"hintCode,omitempty"`
+	CompletionData CompletionData `json:"completionData,omitempty"`
 }
 
 func (r CollectResponse) Unmarshal(data []byte) error {

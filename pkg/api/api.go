@@ -49,6 +49,11 @@ type bankid struct {
 }
 
 func New(config parameters.Parameters) (BankID, error) {
+	err := config.Validate()
+	if err != nil {
+		return nil, fmt.Errorf("error validating parameters: %w", err)
+	}
+
 	c, err := client.New(config)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing client: %w", err)

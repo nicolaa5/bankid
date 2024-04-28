@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/nicolaa5/bankid/internal/validate"
 	"github.com/nicolaa5/bankid/pkg/customerrors"
 	"github.com/nicolaa5/bankid/pkg/parameters"
 	"github.com/nicolaa5/bankid/pkg/request"
@@ -83,15 +82,6 @@ func Request[T response.ResponseBody](p Parameters) (r *T, err error) {
 }
 
 func New(config parameters.Parameters) (*Config, error) {
-	if err := validate.Config(&config); err != nil {
-		return nil, fmt.Errorf("error validating config: %w", err)
-	}
-
-	err := readCert(&config)
-	if err != nil {
-		return nil, fmt.Errorf("error setting certificate: %w", err)
-	}
-
 	// Parse the decrypted .p12 data
 	privateKey, cert, err := pkcs12.Decode(config.CACertificate, config.Passphrase)
 	if err != nil {

@@ -8,12 +8,12 @@ type SignRequest struct {
 	// In some use cases the IP address is not available, for instance in voice-based services. In these cases, the internal representation of those systems’ IP address may be used.
 	EndUserIP string `json:"endUserIp"`
 
-	// Optional: Requirements on how the auth order must be performed. See section Requirements below for more details.
-	Requirement Requirement `json:"requirement,omitempty"`
-
 	// Required: Text to be displayed to the user. String. The text can be formatted using CR, LF and CRLF for new lines.
 	// The text must be encoded as UTF-8 and then base 64 encoded. 1 – 40,000 characters after base 64 encoding.
-	UserVisibleData string `json:"userVisibleData,omitempty"`
+	UserVisibleData string `json:"userVisibleData"`
+
+	// Optional: Requirements on how the auth order must be performed. See section Requirements below for more details.
+	Requirement Requirement `json:"requirement,omitempty"`
 
 	// Optional: Data is not displayed to the user. String. The value must be base 64-encoded. 1-1 500 characters after base 64-encoding.
 	UserNonVisibleData string `json:"userNonVisibleData,omitempty"`

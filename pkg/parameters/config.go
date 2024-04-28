@@ -8,7 +8,7 @@ const (
 )
 
 type Parameters struct {
-	// Required: The SSL & CA certificate for the client
+	// Required: The SSL & CA certificate for the client. 
 	Cert
 
 	// Optional: The URL to BankID API
@@ -20,17 +20,24 @@ type Parameters struct {
 	Timeout int `json:"timeout"`
 }
 
-func (c Parameters) Validate() error {
-	if c.URL == "" {
-		// if url is not set we assume the default value
-		c.URL = BankIDURL
+func (p Parameters) Validate() error {
+	if p.URL == "" {
+		// Set the URL to the default production endpoint if not provided
+		p.URL = BankIDURL
 	}
 
-	if c.SSLCertificate == nil && c.SSLCertificatePath == "" {
+	if p.SSLCertificate == nil {
 		return fmt.Errorf("ssl certificate is not provided")
 	}
-	if c.CACertificate == nil && c.CACertificatePath == "" {
+	
+	if p.CACertificate == nil {
 		return fmt.Errorf("ca root certificate is not provided")
 	}
+
+	// Set the timeout to 5 seconds if not provided
+	if p.Timeout == 0 {
+		p.Timeout = 5
+	}
+
 	return nil
 }
