@@ -34,10 +34,7 @@ func TestAuthenticate(t *testing.T) {
 		name string
 	}{
 		{
-			name: "Authenticate",
-		},
-		{
-			name: "Errorcodes",
+			name: "Authenticate, collect, cancel",
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
@@ -139,6 +136,7 @@ func TestErrorCodes(t *testing.T) {
 					},
 				})
 				require.Error(t, err)
+				fmt.Printf("%v", err.Error())
 
 				e, ok := err.(bankid.BankIDError)
 				require.True(t, ok)

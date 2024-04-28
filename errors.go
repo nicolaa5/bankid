@@ -12,7 +12,7 @@ type BankIDError struct {
 }
 
 func (r BankIDError) Error() string {
-	return fmt.Sprintf("bankid errorcode: %s statuscode: %d details: %s", r.ErrorCode, r.StatusCode, r.Details)
+	return fmt.Sprintf("\n\nBankID \n- StatusCode: \t%d  \n- ErrorCode: \t%s \n- Details: \t%s\n\n", r.StatusCode, r.ErrorCode, r.Details)
 }
 
 const (
