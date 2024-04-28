@@ -22,10 +22,10 @@ type AuthResponse struct {
 	AutoStartToken string `json:"autoStartToken"`
 
 	// Used to compute the animated QR code.
-	QRStartToken string `json:"qrStartToken"`
+	QrStartToken string `json:"qrStartToken"`
 
 	// Used to compute the animated QR code.
-	QRStartSecret string `json:"qrStartSecret"`
+	QrStartSecret string `json:"qrStartSecret"`
 }
 
 func (r AuthResponse) Unmarshal(data []byte) error {

@@ -1,8 +1,20 @@
 package bankid
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
+)
+
+var(
+	//go:embed certs/ca_prod.crt
+	CAProdCertificate []byte
+	
+	//go:embed certs/ca_test.crt
+	CATestCertificate []byte
+	
+	//go:embed certs/ssl_test.p12
+	SSLTestCertificate []byte
 )
 
 // This certificate is used to authenticate the client to the BankID API.

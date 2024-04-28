@@ -12,7 +12,7 @@ type BankIDError struct {
 }
 
 func (r BankIDError) Error() string {
-	return fmt.Sprintf("errorcode: %s statuscode: %d details: %s", r.ErrorCode, r.StatusCode, r.Details)
+	return fmt.Sprintf("bankid errorcode: %s statuscode: %d details: %s", r.ErrorCode, r.StatusCode, r.Details)
 }
 
 const (
@@ -114,7 +114,7 @@ var (
 	}
 )
 
-func AssignError(errorCode ErrorCode) BankIDError {
+func assignError(errorCode ErrorCode) BankIDError {
 	switch errorCode {
 	case AlreadyInProgress:
 		return ErrAlreadyInProgress

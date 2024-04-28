@@ -30,8 +30,8 @@ type ClientParameters struct {
 	Body   RequestBody
 }
 
-// Request sends a request to the BankID API and returns the response.
-func Request[T ResponseBody](p ClientParameters) (r *T, err error) {
+// request sends a request to the BankID API and returns the response.
+func request[T ResponseBody](p ClientParameters) (r *T, err error) {
 	b, err := p.Body.Marshal()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling body: %w", err)
@@ -43,6 +43,7 @@ func Request[T ResponseBody](p ClientParameters) (r *T, err error) {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
+	req.Header.Set("Host", "appapi2.bankid.com")
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := p.Config.Client.Do(req)
@@ -66,7 +67,7 @@ func Request[T ResponseBody](p ClientParameters) (r *T, err error) {
 			return nil, fmt.Errorf("error unmarshalling error response: %w", err)
 		}
 
-		return nil, AssignError(e.ErrorCode)
+		return nil, assignError(e.ErrorCode)
 	}
 
 	err = json.Unmarshal(body, &r)
@@ -77,7 +78,7 @@ func Request[T ResponseBody](p ClientParameters) (r *T, err error) {
 	return r, nil
 }
 
-func newClient(config Parameters) (*Config, error) {
+func newConfig(config Parameters) (*Config, error) {
 	// Parse the decrypted .p12 data
 	privateKey, cert, err := pkcs12.Decode(config.SSLCertificate, config.Passphrase)
 	if err != nil {

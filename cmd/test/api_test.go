@@ -9,17 +9,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAPI(t *testing.T) {
-	cert, err := bankid.CertFromPaths(bankid.CertPaths{
+func TestCertPaths(t *testing.T) {
+	_, err := bankid.CertFromPaths(bankid.CertPaths{
 		Passphrase:         bankid.BankIDTestPassphrase,
 		SSLCertificatePath: "../../certs/ssl_test.p12",
 		CACertificatePath:  "../../certs/ca_test.crt",
 	})
 	require.NoError(t, err)
+}
 
+func TestAuthenticate(t *testing.T) {
 	b, err := bankid.New(bankid.Parameters{
-		URL:  bankid.BankIDTestUrl,
-		Cert: *cert,
+		URL: bankid.BankIDTestUrl,
+		Cert: bankid.Cert{
+			Passphrase:     bankid.BankIDTestPassphrase,
+			SSLCertificate: bankid.SSLTestCertificate,
+			CACertificate:  bankid.CATestCertificate,
+		},
 	})
 	require.NoError(t, err)
 
@@ -35,13 +41,13 @@ func TestAPI(t *testing.T) {
 
 			response, err := b.Auth(bankid.AuthRequest{
 				EndUserIP: randomIPv4(),
-				Requirement: bankid.Requirement{
-					PersonalNumber: "199207201337",
-				},
 			})
-			require.NoError(t, err)
 
-			fmt.Println(response.OrderRef)
+			require.NoError(t, err)
+			require.NotEmpty(t, response.OrderRef)
+			require.NotEmpty(t, response.AutoStartToken)
+			require.NotEmpty(t, response.QrStartSecret)
+			require.NotEmpty(t, response.QrStartToken)
 		})
 	}
 }
