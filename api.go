@@ -4,8 +4,11 @@ import (
 	"fmt"
 )
 
+// BankID is an interface for interacting with the BankID API.
+// You can use it to authenticate users and sign using BankID.
+// Documentation: https://www.bankid.com/en/utvecklare
 type BankID interface {
-	// Initiates an authentication order.
+	// 🗝️ Initiates an authentication order.
 	// Use the collect method to query the status of the order. If the request is successful the response includes:
 	// 	- orderRef
 	// 	- autoStartToken
@@ -14,7 +17,7 @@ type BankID interface {
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/auth
 	Auth(request AuthRequest) (*AuthResponse, error)
 
-	// Initiates an signing order.
+	// 🖋️ Initiates an signing order.
 	// Use the collect method to query the status of the order. If the request is successful the response includes:
 	// 	- orderRef
 	// 	- autoStartToken
@@ -23,23 +26,23 @@ type BankID interface {
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/sign
 	Sign(request SignRequest) (*SignResponse, error)
 
-	// Initiates an authentication order when the user is talking to the RP over the phone.
+	// 🗝️ Initiates an authentication order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-auth
 	PhoneAuth(request PhoneAuthRequest) (*PhoneAuthResponse, error)
 
-	// Initiates an signing order when the user is talking to the RP over the phone.
+	// 🖋️ Initiates an signing order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-sign
 	PhoneSign(request PhoneSignRequest) (*PhoneSignResponse, error)
 
-	// Collects the result of a sign or auth order using orderRef as reference.
+	// 🫳 Collects the result of a sign or auth order using orderRef as reference.
 	// RP should keep on calling collect every two seconds if status is pending.
 	// RP must abort if status indicates failed. The user identity is returned when complete.
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/collect
 	Collect(request CollectRequest) (*CollectResponse, error)
 
-	// Cancels an ongoing sign or auth order.
+	// ✋ Cancels an ongoing sign or auth order.
 	// This is typically used if the user cancels the order in your service or app.
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/cancel
 	Cancel(request CancelRequest) (*CancelResponse, error)
