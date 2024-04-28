@@ -83,7 +83,7 @@ func Request[T response.ResponseBody](p Parameters) (r *T, err error) {
 
 func New(config parameters.Parameters) (*Config, error) {
 	// Parse the decrypted .p12 data
-	privateKey, cert, err := pkcs12.Decode(config.CACertificate, config.Passphrase)
+	privateKey, cert, err := pkcs12.Decode(config.SSLCertificate, config.Passphrase)
 	if err != nil {
 		return nil, fmt.Errorf("error decoding certificate: %w", err)
 	}

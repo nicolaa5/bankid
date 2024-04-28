@@ -13,7 +13,7 @@ import (
 
 func TestAPI(t *testing.T) {
 	cert, err := parameters.NewCert(
-		parameters.WithPassphrase("qwerty"),
+		parameters.WithPassphrase("qwerty123"),
 		parameters.WithSSLCertificatePath("../../certs/ssl_test.p12"),
 		parameters.WithCACertificatePath("../../certs/ca_test.crt"),
 	)
