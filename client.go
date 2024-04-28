@@ -14,24 +14,23 @@ import (
 	"software.sslmate.com/src/go-pkcs12"
 )
 
-// BankID is a go client for the BankID API. The RP interface is JSON based.
+// RequestConfig contains the required config for each request to BankID
 //   - HTTP1.1 is required.
 //   - All methods are accessed using HTTP POST.
 //   - HTTP header 'Content-Type' must be set to 'application/json'.
-//   - The parameters including the leading and ending curly bracket is in the body.
-type Config struct {
+type RequestConfig struct {
 	UrlBase string
 	Client  *http.Client
 }
 
-type ClientParameters struct {
+type RequestParameters struct {
 	Path   string
-	Config *Config
+	Config *RequestConfig
 	Body   RequestBody
 }
 
-// request sends a request to the BankID API and returns the response.
-func request[T ResponseBody](p ClientParameters) (r *T, err error) {
+// request sends a request to the BankID API and handles and returns the response or error.
+func request[T ResponseBody](p RequestParameters) (r *T, err error) {
 	b, err := p.Body.Marshal()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling body: %w", err)
@@ -64,7 +63,7 @@ func request[T ResponseBody](p ClientParameters) (r *T, err error) {
 		e := BankIDError{}
 		err := json.Unmarshal(body, &e)
 		if err != nil {
-			return nil, fmt.Errorf("error unmarshalling error response: %w", err)
+			return nil, fmt.Errorf("unknown error: %w", err)
 		}
 
 		return nil, assignError(e.ErrorCode)
@@ -78,9 +77,9 @@ func request[T ResponseBody](p ClientParameters) (r *T, err error) {
 	return r, nil
 }
 
-func newConfig(config Parameters) (*Config, error) {
+func newRequestConfig(params Parameters) (*RequestConfig, error) {
 	// Decode the .p12 certificate into a private key and the certificate
-	key, cert, err := pkcs12.Decode(config.SSLCertificate, config.Passphrase)
+	key, cert, err := pkcs12.Decode(params.SSLCertificate, params.Passphrase)
 	if err != nil {
 		return nil, fmt.Errorf("error decoding certificate: %w", err)
 	}
@@ -91,7 +90,7 @@ func newConfig(config Parameters) (*Config, error) {
 	}
 
 	certPool := x509.NewCertPool()
-	ok = certPool.AppendCertsFromPEM(config.CACertificate)
+	ok = certPool.AppendCertsFromPEM(params.CACertificate)
 	if !ok {
 		return nil, fmt.Errorf("could not append root certificate to pool")
 	}
@@ -110,14 +109,14 @@ func newConfig(config Parameters) (*Config, error) {
 
 	// Create an HTTP client with the custom TLS configuration
 	client := &http.Client{
-		Timeout: time.Second * time.Duration(config.Timeout),
+		Timeout: time.Second * time.Duration(params.Timeout),
 		Transport: &http.Transport{
 			TLSClientConfig: tlsConfig,
 		},
 	}
 
-	return &Config{
-		UrlBase: config.URL,
+	return &RequestConfig{
+		UrlBase: params.URL,
 		Client:  client,
 	}, nil
 }

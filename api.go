@@ -46,16 +46,16 @@ type BankID interface {
 }
 
 type bankid struct {
-	config *Config
+	config *RequestConfig
 }
 
-func New(config Parameters) (BankID, error) {
-	err := config.Validate()
+func New(input Parameters) (BankID, error) {
+	err := input.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("error validating parameters: %w", err)
 	}
 
-	c, err := newConfig(config)
+	c, err := newRequestConfig(input)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new config: %w", err)
 	}
@@ -67,7 +67,7 @@ func New(config Parameters) (BankID, error) {
 
 // Initiates an authentication order. Use the collect method to query the status of the order.
 func (b *bankid) Auth(req AuthRequest) (*AuthResponse, error) {
-	return request[AuthResponse](ClientParameters{
+	return request[AuthResponse](RequestParameters{
 		Path:   "/auth",
 		Config: b.config,
 		Body:   req,
@@ -76,7 +76,7 @@ func (b *bankid) Auth(req AuthRequest) (*AuthResponse, error) {
 
 // Initiates an signing order. Use the collect method to query the status of the order.
 func (b *bankid) Sign(req SignRequest) (*SignResponse, error) {
-	return request[SignResponse](ClientParameters{
+	return request[SignResponse](RequestParameters{
 		Path:   "/sign",
 		Config: b.config,
 		Body:   req,
@@ -85,7 +85,7 @@ func (b *bankid) Sign(req SignRequest) (*SignResponse, error) {
 
 // Initiates an authentication order when the user is talking to the RP over the phone.
 func (b *bankid) PhoneAuth(req PhoneAuthRequest) (*PhoneAuthResponse, error) {
-	return request[PhoneAuthResponse](ClientParameters{
+	return request[PhoneAuthResponse](RequestParameters{
 		Path:   "/cancel",
 		Config: b.config,
 		Body:   req,
@@ -94,7 +94,7 @@ func (b *bankid) PhoneAuth(req PhoneAuthRequest) (*PhoneAuthResponse, error) {
 
 // Initiates an signing order when the user is talking to the RP over the phone.
 func (b *bankid) PhoneSign(req PhoneSignRequest) (*PhoneSignResponse, error) {
-	return request[PhoneSignResponse](ClientParameters{
+	return request[PhoneSignResponse](RequestParameters{
 		Path:   "/phone/sign",
 		Config: b.config,
 		Body:   req,
@@ -103,7 +103,7 @@ func (b *bankid) PhoneSign(req PhoneSignRequest) (*PhoneSignResponse, error) {
 
 // Collects the result of a sign or auth order using orderRef as reference.
 func (b *bankid) Collect(req CollectRequest) (*CollectResponse, error) {
-	return request[CollectResponse](ClientParameters{
+	return request[CollectResponse](RequestParameters{
 		Path:   "/collect",
 		Config: b.config,
 		Body:   req,
@@ -112,7 +112,7 @@ func (b *bankid) Collect(req CollectRequest) (*CollectResponse, error) {
 
 // Cancels an ongoing sign or auth order.
 func (b *bankid) Cancel(req CancelRequest) (*CancelResponse, error) {
-	return request[CancelResponse](ClientParameters{
+	return request[CancelResponse](RequestParameters{
 		Path:   "/cancel",
 		Config: b.config,
 		Body:   req,
