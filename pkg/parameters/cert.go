@@ -18,41 +18,44 @@ type Cert struct {
 	CACertificate []byte `json:"caCertificate"`
 }
 
-func NewCert(opts ...CertOption) (Cert, error) {
-	config := Cert{}
+func NewCert(opts ...CertOption) (*Cert, error) {
+	config := &Cert{}
 
 	for _, opt := range opts {
-		opt(config)
+		err := opt(config)
+		if err != nil {
+			return nil, fmt.Errorf("invalid input: %w", err)
+		}
 	}
 
 	return config, nil
 }
 
-type CertOption func(Cert) error
+type CertOption func(*Cert) error
 
 func WithSSLCertificate(cert []byte) CertOption {
-	return func(c Cert) error {
+	return func(c *Cert) error {
 		c.SSLCertificate = cert
 		return nil
 	}
 }
 
 func WithPassphrase(passphrase string) CertOption {
-	return func(c Cert) error {
+	return func(c *Cert) error {
 		c.Passphrase = passphrase
 		return nil
 	}
 }
 
 func WithCACertificate(cert []byte) CertOption {
-	return func(c Cert) error {
+	return func(c *Cert) error {
 		c.CACertificate = cert
 		return nil
 	}
 }
 
 func WithSSLCertificatePath(path string) CertOption {
-	return func(c Cert) error {
+	return func(c *Cert) error {
 		p12, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("error reading .p12 file: %w", err)
@@ -64,7 +67,7 @@ func WithSSLCertificatePath(path string) CertOption {
 }
 
 func WithCACertificatePath(path string) CertOption {
-	return func(c Cert) error {
+	return func(c *Cert) error {
 		ca, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("error reading root certificate file: %w", err)

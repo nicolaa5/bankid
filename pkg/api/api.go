@@ -16,6 +16,7 @@ type BankID interface {
 	// 	- autoStartToken
 	// 	- qrStartToken
 	// 	- qrStartSecret
+	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/auth
 	Auth(request request.AuthRequest) (*response.AuthResponse, error)
 
 	// Initiates an signing order.
@@ -24,23 +25,28 @@ type BankID interface {
 	// 	- autoStartToken
 	// 	- qrStartToken
 	// 	- qrStartSecret
+	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/sign
 	Sign(request request.SignRequest) (*response.SignResponse, error)
 
 	// Initiates an authentication order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
+	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-auth
 	PhoneAuth(request request.PhoneAuthRequest) (*response.PhoneAuthResponse, error)
 
 	// Initiates an signing order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
+	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-sign
 	PhoneSign(request request.PhoneSignRequest) (*response.PhoneSignResponse, error)
 
 	// Collects the result of a sign or auth order using orderRef as reference.
 	// RP should keep on calling collect every two seconds if status is pending.
 	// RP must abort if status indicates failed. The user identity is returned when complete.
+	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/collect
 	Collect(request request.CollectRequest) (*response.CollectResponse, error)
 
 	// Cancels an ongoing sign or auth order.
 	// This is typically used if the user cancels the order in your service or app.
+	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/cancel
 	Cancel(request request.CancelRequest) (*response.CancelResponse, error)
 }
 
