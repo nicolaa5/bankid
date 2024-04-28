@@ -79,14 +79,19 @@ func request[T ResponseBody](p ClientParameters) (r *T, err error) {
 }
 
 func newConfig(config Parameters) (*Config, error) {
-	// Parse the decrypted .p12 data
-	privateKey, cert, err := pkcs12.Decode(config.SSLCertificate, config.Passphrase)
+	// Decode the .p12 certificate into a private key and the certificate
+	key, cert, err := pkcs12.Decode(config.SSLCertificate, config.Passphrase)
 	if err != nil {
 		return nil, fmt.Errorf("error decoding certificate: %w", err)
 	}
 
+	privateKey, ok := key.(crypto.PrivateKey)
+	if !ok {
+		return nil, fmt.Errorf("could not assert private key")
+	}
+
 	certPool := x509.NewCertPool()
-	ok := certPool.AppendCertsFromPEM(config.CACertificate)
+	ok = certPool.AppendCertsFromPEM(config.CACertificate)
 	if !ok {
 		return nil, fmt.Errorf("could not append root certificate to pool")
 	}
@@ -97,7 +102,7 @@ func newConfig(config Parameters) (*Config, error) {
 		Certificates: []tls.Certificate{
 			{
 				Certificate: [][]byte{cert.Raw},
-				PrivateKey:  privateKey.(crypto.PrivateKey),
+				PrivateKey:  privateKey,
 				Leaf:        cert,
 			},
 		},
