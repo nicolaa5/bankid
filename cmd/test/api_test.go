@@ -10,7 +10,7 @@ import (
 )
 
 func TestCertPaths(t *testing.T) {
-	_, err := bankid.CertFromPaths(bankid.CertPaths{
+	_, err := bankid.CertificateFromPaths(bankid.CertificatePaths{
 		Passphrase:         bankid.BankIDTestPassphrase,
 		SSLCertificatePath: "../../certs/ssl_test.p12",
 		CACertificatePath:  "../../certs/ca_test.crt",
@@ -21,7 +21,7 @@ func TestCertPaths(t *testing.T) {
 func TestAuthenticate(t *testing.T) {
 	b, err := bankid.New(bankid.Parameters{
 		URL: bankid.BankIDTestUrl,
-		Cert: bankid.Cert{
+		Certificate: bankid.Certificate{
 			Passphrase:     bankid.BankIDTestPassphrase,
 			SSLCertificate: bankid.SSLTestCertificate,
 			CACertificate:  bankid.CATestCertificate,

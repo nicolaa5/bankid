@@ -10,7 +10,7 @@ const (
 
 type Parameters struct {
 	// Required: The SSL & CA certificate for the client.
-	Cert
+	Certificate
 
 	// Optional: The URL to BankID API, can be set to the test or production endpoint.
 	// Default: "https://appapi2.bankid.com/rp/v6.0"

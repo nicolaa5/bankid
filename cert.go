@@ -6,19 +6,19 @@ import (
 	"os"
 )
 
-var(
+var (
 	//go:embed certs/ca_prod.crt
 	CAProdCertificate []byte
-	
+
 	//go:embed certs/ca_test.crt
 	CATestCertificate []byte
-	
+
 	//go:embed certs/ssl_test.p12
 	SSLTestCertificate []byte
 )
 
 // This certificate is used to authenticate the client to the BankID API.
-type Cert struct {
+type Certificate struct {
 	// Required: The password for your SSLCertificate
 	Passphrase string `json:"passphrase"`
 
@@ -30,7 +30,7 @@ type Cert struct {
 	CACertificate []byte `json:"caCertificate"`
 }
 
-type CertPaths struct {
+type CertificatePaths struct {
 	// Required: The password for your SSLCertificate
 	Passphrase string `json:"passphrase"`
 
@@ -41,7 +41,7 @@ type CertPaths struct {
 	CACertificatePath string `json:"caCertificatePath"`
 }
 
-func CertFromPaths(params CertPaths) (*Cert, error) {
+func CertificateFromPaths(params CertificatePaths) (*Certificate, error) {
 	if params.Passphrase == "" {
 		return nil, fmt.Errorf("passphrase is required")
 	}
@@ -54,7 +54,7 @@ func CertFromPaths(params CertPaths) (*Cert, error) {
 		return nil, fmt.Errorf("ca certificate path is required")
 	}
 
-	cert := &Cert{}
+	cert := &Certificate{}
 	cert.Passphrase = params.Passphrase
 
 	p12, err := os.ReadFile(params.SSLCertificatePath)
