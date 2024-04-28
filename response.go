@@ -1,6 +1,63 @@
-package response
+package bankid
 
 import "encoding/json"
+
+// ResponseBody is an interface for all successfull BankID responses.
+type ResponseBody interface {
+	// Unmarshal parses the JSON-encoded data and stores the result in the value pointed to by v.
+	Unmarshal(data []byte) error
+}
+
+type ErrorResponseBody struct {
+	ErrorCode int    `json:"errorCode"`
+	Details   string `json:"details"`
+}
+
+type AuthResponse struct {
+	// Used to collect the status of the order.
+	OrderRef string `json:"orderRef"`
+
+	// Used to compile the start url according to launching.
+	// See https://www.bankid.com/utvecklare/guider/teknisk-integrationsguide/programstart
+	AutoStartToken string `json:"autoStartToken"`
+
+	// Used to compute the animated QR code.
+	QRStartToken string `json:"qrStartToken"`
+
+	// Used to compute the animated QR code.
+	QRStartSecret string `json:"qrStartSecret"`
+}
+
+func (r AuthResponse) Unmarshal(data []byte) error {
+	return json.Unmarshal(data, &r)
+}
+
+type SignResponse struct {
+	// Used to collect the status of the order.
+	OrderRef string `json:"orderRef"`
+}
+
+func (r SignResponse) Unmarshal(data []byte) error {
+	return json.Unmarshal(data, &r)
+}
+
+type PhoneAuthResponse struct {
+	// Used to collect the status of the order.
+	OrderRef string `json:"orderRef"`
+}
+
+func (r PhoneAuthResponse) Unmarshal(data []byte) error {
+	return json.Unmarshal(data, &r)
+}
+
+type PhoneSignResponse struct {
+	// Used to collect the status of the order.
+	OrderRef string `json:"orderRef"`
+}
+
+func (r PhoneSignResponse) Unmarshal(data []byte) error {
+	return json.Unmarshal(data, &r)
+}
 
 type CollectResponse struct {
 	OrderRef       string         `json:"orderRef"`
@@ -85,3 +142,10 @@ const (
 	// 	2. Client software was not installed or other problem with the user’s device.
 	StartFailed HintCode = "startFailed"
 )
+
+// A successful response contains an empty JSON object.
+type CancelResponse struct{}
+
+func (r CancelResponse) Unmarshal(data []byte) error {
+	return nil
+}

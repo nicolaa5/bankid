@@ -1,14 +1,15 @@
-package parameters
+package bankid
 
 import "fmt"
 
 const (
-	BankIDURL     = "https://appapi2.bankid.com/rp/v6.0"
-	BankIDTestUrl = "https://appapi2.test.bankid.com/rp/v6.0"
+	BankIDURL            = "https://appapi2.bankid.com/rp/v6.0"
+	BankIDTestUrl        = "https://appapi2.test.bankid.com/rp/v6.0"
+	BankIDTestPassphrase = "qwerty123"
 )
 
 type Parameters struct {
-	// Required: The SSL & CA certificate for the client. 
+	// Required: The SSL & CA certificate for the client.
 	Cert
 
 	// Optional: The URL to BankID API
@@ -29,7 +30,7 @@ func (p Parameters) Validate() error {
 	if p.SSLCertificate == nil {
 		return fmt.Errorf("ssl certificate is not provided")
 	}
-	
+
 	if p.CACertificate == nil {
 		return fmt.Errorf("ca root certificate is not provided")
 	}

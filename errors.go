@@ -1,4 +1,4 @@
-package customerrors
+package bankid
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 
 // BankIDError is an error returned by BankID that should be communicated to the enduser, or handled by the RP.
 type BankIDError struct {
-	StatusCode int `json:"statusCode,omitempty"`
-	Details    string `json:"details,omitempty"`
+	StatusCode int       `json:"statusCode,omitempty"`
+	Details    string    `json:"details,omitempty"`
 	ErrorCode  ErrorCode `json:"errorCode,omitempty"`
 }
 
@@ -43,7 +43,7 @@ var (
 	ErrAlreadyInProgress = BankIDError{
 		StatusCode: 208, // HTTP 208 - Already In Progress
 		Details:    RFA4,
-		ErrorCode: AlreadyInProgress,
+		ErrorCode:  AlreadyInProgress,
 	}
 
 	// If an unknown errorCode is returned, RP should inform the user. Message RFA22 should be used.
@@ -77,7 +77,7 @@ var (
 		Details:    RFA5,
 		ErrorCode:  Maintenance,
 	}
-	
+
 	// RP must not try the same request again. This is an internal error within the RP's system and must not be communicated to the user as a BankID error.
 	ErrInvalidParameters = BankIDError{
 		StatusCode: 400, // HTTP 400 - Bad Request
@@ -113,3 +113,28 @@ var (
 		ErrorCode:  UnsupportedMediaType,
 	}
 )
+
+func AssignError(errorCode ErrorCode) BankIDError {
+	switch errorCode {
+	case AlreadyInProgress:
+		return ErrAlreadyInProgress
+	case RequestTimeout:
+		return ErrRequestTimeout
+	case InternalError:
+		return ErrInternalError
+	case Maintenance:
+		return ErrMaintenance
+	case InvalidParameters:
+		return ErrInvalidParameters
+	case Unauthorized:
+		return ErrUnauthorized
+	case NotFound:
+		return ErrNotFound
+	case MethodNotAllowed:
+		return ErrMethodNotAllowed
+	case UnsupportedMediaType:
+		return ErrUnsupportedMediaType
+	default:
+		return ErrUnknownErrorCode
+	}
+}

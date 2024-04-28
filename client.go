@@ -1,4 +1,4 @@
-package client
+package bankid
 
 import (
 	"bytes"
@@ -11,10 +11,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/nicolaa5/bankid/pkg/customerrors"
-	"github.com/nicolaa5/bankid/pkg/parameters"
-	"github.com/nicolaa5/bankid/pkg/request"
-	"github.com/nicolaa5/bankid/pkg/response"
 	"software.sslmate.com/src/go-pkcs12"
 )
 
@@ -28,14 +24,14 @@ type Config struct {
 	Client  *http.Client
 }
 
-type Parameters struct {
+type ClientParameters struct {
 	Path   string
 	Config *Config
-	Body   request.RequestBody
+	Body   RequestBody
 }
 
 // Request sends a request to the BankID API and returns the response.
-func Request[T response.ResponseBody](p Parameters) (r *T, err error) {
+func Request[T ResponseBody](p ClientParameters) (r *T, err error) {
 	b, err := p.Body.Marshal()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling body: %w", err)
@@ -64,13 +60,13 @@ func Request[T response.ResponseBody](p Parameters) (r *T, err error) {
 	case nil:
 		// All good
 	default:
-		e := customerrors.BankIDError{}
+		e := BankIDError{}
 		err := json.Unmarshal(body, &e)
 		if err != nil {
 			return nil, fmt.Errorf("error unmarshalling error response: %w", err)
 		}
 
-		return nil, customerrors.AssignError(e.ErrorCode)
+		return nil, AssignError(e.ErrorCode)
 	}
 
 	err = json.Unmarshal(body, &r)
@@ -81,7 +77,7 @@ func Request[T response.ResponseBody](p Parameters) (r *T, err error) {
 	return r, nil
 }
 
-func New(config parameters.Parameters) (*Config, error) {
+func newClient(config Parameters) (*Config, error) {
 	// Parse the decrypted .p12 data
 	privateKey, cert, err := pkcs12.Decode(config.SSLCertificate, config.Passphrase)
 	if err != nil {

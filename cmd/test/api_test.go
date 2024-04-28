@@ -5,26 +5,24 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/nicolaa5/bankid/pkg/api"
-	"github.com/nicolaa5/bankid/pkg/parameters"
-	"github.com/nicolaa5/bankid/pkg/request"
+	"github.com/nicolaa5/bankid"
 	"github.com/stretchr/testify/require"
 )
 
 func TestAPI(t *testing.T) {
-	cert, err := parameters.NewCert(
-		parameters.WithPassphrase("qwerty123"),
-		parameters.WithSSLCertificatePath("../../certs/ssl_test.p12"),
-		parameters.WithCACertificatePath("../../certs/ca_test.crt"),
-	)
+	cert, err := bankid.CertFromPaths(bankid.CertPaths{
+		Passphrase:         bankid.BankIDTestPassphrase,
+		SSLCertificatePath: "../../certs/ssl_test.p12",
+		CACertificatePath:  "../../certs/ca_test.crt",
+	})
 	require.NoError(t, err)
 
-	b, err := api.New(parameters.Parameters{
-		URL:  parameters.BankIDTestUrl,
+	b, err := bankid.New(bankid.Parameters{
+		URL:  bankid.BankIDTestUrl,
 		Cert: *cert,
 	})
 	require.NoError(t, err)
-	
+
 	for _, tt := range []struct {
 		name string
 	}{
@@ -35,7 +33,7 @@ func TestAPI(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			response, err := b.Auth(request.AuthRequest{
+			response, err := b.Auth(bankid.AuthRequest{
 				EndUserIP: randomIPv4(),
 			})
 			require.NoError(t, err)
