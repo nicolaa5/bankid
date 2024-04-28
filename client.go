@@ -47,7 +47,7 @@ func request[T ResponseBody](p RequestParameters) (r *T, err error) {
 
 	res, err := p.Config.Client.Do(req)
 	if res == nil {
-		return nil, fmt.Errorf("error sending request: %w", err)
+		return nil, fmt.Errorf("error request: %w", err)
 	}
 	defer res.Body.Close()
 
@@ -56,10 +56,7 @@ func request[T ResponseBody](p RequestParameters) (r *T, err error) {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
 
-	switch err.(type) {
-	case nil:
-		// All good
-	default:
+	if(res.StatusCode >= 300) {
 		e := BankIDError{}
 		err := json.Unmarshal(body, &e)
 		if err != nil {

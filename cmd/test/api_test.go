@@ -7,6 +7,7 @@ import (
 
 	"github.com/nicolaa5/bankid"
 	"github.com/stretchr/testify/require"
+    "github.com/google/uuid"
 )
 
 func TestCertPaths(t *testing.T) {
@@ -34,6 +35,9 @@ func TestAuthenticate(t *testing.T) {
 	}{
 		{
 			name: "Authenticate",
+		},
+		{
+			name: "Errorcodes",
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
@@ -67,7 +71,118 @@ func TestAuthenticate(t *testing.T) {
 	}
 }
 
+func TestErrorCodes(t *testing.T) {
+	b, err := bankid.New(bankid.Parameters{
+		URL: bankid.BankIDTestUrl,
+		Certificate: bankid.Certificate{
+			Passphrase:     bankid.BankIDTestPassphrase,
+			SSLCertificate: bankid.SSLTestCertificate,
+			CACertificate:  bankid.CATestCertificate,
+		},
+	})
+	require.NoError(t, err)
+
+	for _, tt := range []struct{
+		expected bankid.BankIDError
+		f func()
+	}{
+		{expected: bankid.ErrInvalidParameters},
+		{expected: bankid.ErrAlreadyInProgress},
+		{expected: bankid.ErrUnauthorized},
+	}{
+		t.Run("Test Error Codes", func(t *testing.T) {
+			test := tt
+			t.Parallel()
+
+			switch(test.expected.ErrorCode) {
+			case bankid.InvalidParameters:
+				//empty invalid IP as EndUserIP
+				_, err := b.Auth(bankid.AuthRequest{
+					EndUserIP: "",
+				})
+				require.Error(t, err)
+
+				e, ok := err.(bankid.BankIDError)
+				require.True(t, ok)
+				require.Equal(t, e.ErrorCode, bankid.InvalidParameters)
+
+				//using non-existent orderRef
+				uniqueID := uuid.New()
+				_, err = b.Collect(bankid.CollectRequest{
+					OrderRef: uniqueID.String(),
+				})
+				require.Error(t, err)
+
+				e, ok = err.(bankid.BankIDError)
+				require.True(t, ok)
+				require.Equal(t, e.ErrorCode, bankid.InvalidParameters)
+
+
+			case bankid.AlreadyInProgress:
+				ip := randomIPv4()
+				personNummer := randomPersonnummer()
+
+				//first request
+				_, err := b.Auth(bankid.AuthRequest{
+					EndUserIP: ip,
+					Requirement: bankid.Requirement{
+						PersonalNumber: personNummer,
+					},
+				})
+				require.NoError(t, err)
+
+				//second request with the same personNummer
+				_, err = b.Auth(bankid.AuthRequest{
+					EndUserIP: ip,
+					Requirement: bankid.Requirement{
+						PersonalNumber: personNummer,
+					},
+				})
+				require.Error(t, err)
+
+				e, ok := err.(bankid.BankIDError)
+				require.True(t, ok)
+				require.Equal(t, e.ErrorCode, bankid.AlreadyInProgress)
+
+			case bankid.NotFound:
+				b, err := bankid.New(bankid.Parameters{
+					// add non-existent path to URL
+					URL: "https://appapi2.test.bankid.com/rp/v6.0/forbidden/path",
+					Certificate: bankid.Certificate{
+						Passphrase:     bankid.BankIDTestPassphrase,
+						SSLCertificate: bankid.SSLTestCertificate,
+						CACertificate:  bankid.CATestCertificate,
+					},
+				})
+				require.NoError(t, err)
+
+				_, err = b.Auth(bankid.AuthRequest{
+					EndUserIP: randomIPv4(),
+				})
+				require.Error(t, err)
+
+				e, ok := err.(bankid.BankIDError)
+				require.True(t, ok)
+				require.Equal(t, e.ErrorCode, bankid.ErrUnauthorized)
+			}
+		})
+	}
+}
+
 func randomIPv4() string {
 	num := func() int { return 2 + rand.Intn(254) }
 	return fmt.Sprintf("%d.%d.%d.%d", num(), num(), num(), num())
+}
+
+func randomNumber(min, max int) int {
+    return rand.Intn(max-min+1) + min
+}
+
+func randomPersonnummer() string {
+    year := randomNumber(1900, 2024)
+    month := randomNumber(1, 12)
+    day := randomNumber(1, 28)
+    serialNumber := randomNumber(1000, 9999)
+
+	return fmt.Sprintf("%04d%02d%02d%04d", year, month, day, serialNumber)
 }

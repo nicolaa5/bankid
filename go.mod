@@ -2,7 +2,10 @@ module github.com/nicolaa5/bankid
 
 go 1.21.0
 
-require software.sslmate.com/src/go-pkcs12 v0.4.0
+require (
+	github.com/google/uuid v1.6.0
+	software.sslmate.com/src/go-pkcs12 v0.4.0
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

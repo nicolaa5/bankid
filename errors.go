@@ -87,7 +87,7 @@ var (
 
 	// RP must not try the same request again. This is an internal error within the RP's system and must not be communicated to the user as a BankID error.
 	ErrUnauthorized = BankIDError{
-		StatusCode: 401, // HTTP 401 - Unauthorized
+		StatusCode: 403, // HTTP 403 - Forbidden
 		Details:    "RP does not have access to the service. Internal error within the RP's system.",
 		ErrorCode:  Unauthorized,
 	}
