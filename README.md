@@ -1,9 +1,9 @@
 <div align="center">
     <img width=300 src="./bankid-go.png"/>
-    ![ Unit Tests](https://github.com/nicolaa5/bankid/actions/workflows/unit.tests.yml/badge.svg)  
 </div>
 
 ## 🇸🇪 BankID - API Client
+![ Unit Tests](https://github.com/nicolaa5/bankid/actions/workflows/unit.tests.yml/badge.svg)  
 
 ### Who is this repository for? 
 You can use this repo if you're using BankID in your organization for one of the following purposes: 
@@ -13,6 +13,7 @@ You can use this repo if you're using BankID in your organization for one of the
 ### Setup
 For setup instructions from BankID visit [their integration guide](https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/rp-introduktion)
 
+### Examples
 ```go
 // Provide certificate and URL 
 b, err := bankid.New(bankid.Parameters{
