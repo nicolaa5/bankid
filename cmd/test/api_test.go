@@ -39,15 +39,30 @@ func TestAuthenticate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			response, err := b.Auth(bankid.AuthRequest{
+			authResponse, err := b.Auth(bankid.AuthRequest{
 				EndUserIP: randomIPv4(),
 			})
 
 			require.NoError(t, err)
-			require.NotEmpty(t, response.OrderRef)
-			require.NotEmpty(t, response.AutoStartToken)
-			require.NotEmpty(t, response.QrStartSecret)
-			require.NotEmpty(t, response.QrStartToken)
+			require.NotEmpty(t, authResponse.OrderRef)
+			require.NotEmpty(t, authResponse.AutoStartToken)
+			require.NotEmpty(t, authResponse.QrStartSecret)
+			require.NotEmpty(t, authResponse.QrStartToken)
+
+			collectResponse, err := b.Collect(bankid.CollectRequest{
+				OrderRef: authResponse.OrderRef,
+			})
+
+			require.NoError(t, err)
+			require.Equal(t, collectResponse.OrderRef, authResponse.OrderRef)
+			require.Equal(t, collectResponse.Status, bankid.Pending)
+			require.Equal(t, collectResponse.HintCode, bankid.OutstandingTransaction)
+
+			_, err = b.Cancel(bankid.CancelRequest{
+				OrderRef: authResponse.OrderRef,
+			})
+
+			require.NoError(t, err)
 		})
 	}
 }
