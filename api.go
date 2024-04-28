@@ -57,7 +57,7 @@ func New(config Parameters) (BankID, error) {
 
 	c, err := newClient(config)
 	if err != nil {
-		return nil, fmt.Errorf("error initializing client: %w", err)
+		return nil, fmt.Errorf("error creating new client: %w", err)
 	}
 
 	return &bankid{

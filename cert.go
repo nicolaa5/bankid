@@ -30,6 +30,18 @@ type CertPaths struct {
 }
 
 func CertFromPaths(params CertPaths) (*Cert, error) {
+	if params.Passphrase == "" {
+		return nil, fmt.Errorf("passphrase is required")
+	}
+
+	if params.SSLCertificatePath == "" {
+		return nil, fmt.Errorf("ssl certificate path is required")
+	}
+
+	if params.CACertificatePath == "" {
+		return nil, fmt.Errorf("ca certificate path is required")
+	}
+
 	cert := &Cert{}
 	cert.Passphrase = params.Passphrase
 
@@ -47,64 +59,4 @@ func CertFromPaths(params CertPaths) (*Cert, error) {
 
 	cert.CACertificate = ca
 	return cert, nil
-}
-
-func NewCert(opts ...CertOption) (*Cert, error) {
-	cert := &Cert{}
-
-	for _, opt := range opts {
-		err := opt(cert)
-		if err != nil {
-			return nil, fmt.Errorf("invalid input: %w", err)
-		}
-	}
-
-	return cert, nil
-}
-
-type CertOption func(*Cert) error
-
-func WithSSLCertificate(cert []byte) CertOption {
-	return func(c *Cert) error {
-		c.SSLCertificate = cert
-		return nil
-	}
-}
-
-func WithPassphrase(passphrase string) CertOption {
-	return func(c *Cert) error {
-		c.Passphrase = passphrase
-		return nil
-	}
-}
-
-func WithCACertificate(cert []byte) CertOption {
-	return func(c *Cert) error {
-		c.CACertificate = cert
-		return nil
-	}
-}
-
-func WithSSLCertificatePath(path string) CertOption {
-	return func(c *Cert) error {
-		p12, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("error reading .p12 file: %w", err)
-		}
-
-		c.SSLCertificate = p12
-		return nil
-	}
-}
-
-func WithCACertificatePath(path string) CertOption {
-	return func(c *Cert) error {
-		ca, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("error reading root certificate file: %w", err)
-		}
-
-		c.CACertificate = ca
-		return nil
-	}
 }

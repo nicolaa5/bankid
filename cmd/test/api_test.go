@@ -35,6 +35,9 @@ func TestAPI(t *testing.T) {
 
 			response, err := b.Auth(bankid.AuthRequest{
 				EndUserIP: randomIPv4(),
+				Requirement: bankid.Requirement{
+					PersonalNumber: "199207201337",
+				},
 			})
 			require.NoError(t, err)
 
