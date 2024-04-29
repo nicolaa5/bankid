@@ -55,7 +55,7 @@ func request[T ResponseBody](p RequestParameters) (r *T, err error) {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
 
-	if(res.StatusCode >= 300) {
+	if res.StatusCode >= 300 {
 		e := BankIDError{}
 		err := json.Unmarshal(body, &e)
 		if err != nil {

@@ -13,14 +13,14 @@ type ErrorResponseBody struct {
 	Details   string `json:"details"`
 }
 
-
-// Response received from the auth endpoint, example of the response body: 
-// {
-//     "orderRef": "4820e3da-fbd7-45c0-aa1c-9d28d308c63b",
-//     "autoStartToken": "f5071e97-ad0c-45ff-bc05-ca4bd8f14f84",
-//     "qrStartToken": "a9002853-0445-4021-be15-9e373b71634a",
-//     "qrStartSecret": "1238c8af-66d1-4c4a-8c00-b77deabeea98"
-// }
+// Response received from the auth endpoint, example of the response body:
+//
+//	{
+//	    "orderRef": "4820e3da-fbd7-45c0-aa1c-9d28d308c63b",
+//	    "autoStartToken": "f5071e97-ad0c-45ff-bc05-ca4bd8f14f84",
+//	    "qrStartToken": "a9002853-0445-4021-be15-9e373b71634a",
+//	    "qrStartSecret": "1238c8af-66d1-4c4a-8c00-b77deabeea98"
+//	}
 type AuthResponse struct {
 	// Used to collect the status of the order.
 	OrderRef string `json:"orderRef"`
@@ -68,11 +68,12 @@ func (r PhoneSignResponse) Unmarshal(data []byte) error {
 }
 
 // Response received from the collect endpoint, example of the collect response body:
-// {
-//     "orderRef": "b7e32e4f-0c1f-472b-9111-40dc856464b4",
-//     "status": "pending",
-//     "hintCode": "outstandingTransaction"
-// }
+//
+//	{
+//	    "orderRef": "b7e32e4f-0c1f-472b-9111-40dc856464b4",
+//	    "status": "pending",
+//	    "hintCode": "outstandingTransaction"
+//	}
 type CollectResponse struct {
 	OrderRef       string         `json:"orderRef"`
 	Status         Status         `json:"status"`

@@ -5,9 +5,9 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/nicolaa5/bankid"
 	"github.com/stretchr/testify/require"
-    "github.com/google/uuid"
 )
 
 func TestCertPaths(t *testing.T) {
@@ -79,19 +79,19 @@ func TestErrorCodes(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	for _, tt := range []struct{
+	for _, tt := range []struct {
 		expected bankid.BankIDError
-		f func()
+		f        func()
 	}{
 		{expected: bankid.ErrInvalidParameters},
 		{expected: bankid.ErrAlreadyInProgress},
 		{expected: bankid.ErrUnauthorized},
-	}{
+	} {
 		t.Run("Test Error Codes", func(t *testing.T) {
 			test := tt
 			t.Parallel()
 
-			switch(test.expected.ErrorCode) {
+			switch test.expected.ErrorCode {
 			case bankid.InvalidParameters:
 				//empty invalid IP as EndUserIP
 				_, err := b.Auth(bankid.AuthRequest{
@@ -113,7 +113,6 @@ func TestErrorCodes(t *testing.T) {
 				e, ok = err.(bankid.BankIDError)
 				require.True(t, ok)
 				require.Equal(t, e.ErrorCode, bankid.InvalidParameters)
-
 
 			case bankid.AlreadyInProgress:
 				ip := randomIPv4()
@@ -173,14 +172,14 @@ func randomIPv4() string {
 }
 
 func randomNumber(min, max int) int {
-    return rand.Intn(max-min+1) + min
+	return rand.Intn(max-min+1) + min
 }
 
 func randomPersonnummer() string {
-    year := randomNumber(1900, 2024)
-    month := randomNumber(1, 12)
-    day := randomNumber(1, 28)
-    serialNumber := randomNumber(1000, 9999)
+	year := randomNumber(1900, 2024)
+	month := randomNumber(1, 12)
+	day := randomNumber(1, 28)
+	serialNumber := randomNumber(1000, 9999)
 
 	return fmt.Sprintf("%04d%02d%02d%04d", year, month, day, serialNumber)
 }
