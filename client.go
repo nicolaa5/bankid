@@ -42,7 +42,6 @@ func request[T ResponseBody](p RequestParameters) (r *T, err error) {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	req.Header.Set("Host", "appapi2.bankid.com")
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := p.Config.Client.Do(req)

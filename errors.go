@@ -41,7 +41,7 @@ var (
 	// RP must inform the user that an auth or sign order is already in progress for the user.
 	// Message RFA4 should be used.
 	ErrAlreadyInProgress = BankIDError{
-		StatusCode: 208, // HTTP 208 - Already In Progress
+		StatusCode: 400, // HTTP 400 - Bad Request
 		Details:    RFA4,
 		ErrorCode:  AlreadyInProgress,
 	}
