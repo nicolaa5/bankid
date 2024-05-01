@@ -89,7 +89,7 @@ func (b *bankid) Sign(req SignRequest) (*SignResponse, error) {
 // Initiates an authentication order when the user is talking to the RP over the phone.
 func (b *bankid) PhoneAuth(req PhoneAuthRequest) (*PhoneAuthResponse, error) {
 	return request[PhoneAuthResponse](RequestParameters{
-		Path:   "/cancel",
+		Path:   "/phone/auth",
 		Config: b.config,
 		Body:   req,
 	})
