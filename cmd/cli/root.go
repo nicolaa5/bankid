@@ -26,6 +26,11 @@ var rootCmd = &cobra.Command{
 		}
 		survey.AskOne(prompt, &endpoint, survey.WithValidator(survey.Required))
 
+		switch(endpoint) {
+		case "/auth":
+			authCommand.Run(cmd, args)
+		}
+
 		// Process user input
 		fmt.Printf("Called, %s endpoint\n", endpoint)
 	},
@@ -34,6 +39,7 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }
