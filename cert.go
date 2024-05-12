@@ -13,7 +13,7 @@ var (
 	//go:embed certs/ca_test.crt
 	CATestCertificate []byte
 
-	//go:embed certs/ssl_test.p12
+	//go:embed certs/FPTestcert4_20230629.p12
 	SSLTestCertificate []byte
 )
 

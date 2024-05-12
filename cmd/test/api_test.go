@@ -13,7 +13,7 @@ import (
 func TestCertPaths(t *testing.T) {
 	_, err := bankid.CertificateFromPaths(bankid.CertificatePaths{
 		Passphrase:         bankid.BankIDTestPassphrase,
-		SSLCertificatePath: "../../certs/ssl_test.p12",
+		SSLCertificatePath: "../../certs/FPTestcert4_20230629.p12",
 		CACertificatePath:  "../../certs/ca_test.crt",
 	})
 	require.NoError(t, err)

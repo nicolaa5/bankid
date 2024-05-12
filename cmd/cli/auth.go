@@ -60,7 +60,7 @@ var authCommand = &cobra.Command{
 			log.Fatalf("Internal error in CLI app: %v", err)
 		}
 
-		response, err := b.Auth(bankid.AuthRequest{
+		authResponse, err := b.Auth(bankid.AuthRequest{
 			EndUserIP: endUserIp,
 			Requirement: bankid.Requirement{
 				PersonalNumber: personNummer,
@@ -70,16 +70,8 @@ var authCommand = &cobra.Command{
 			fmt.Printf("Response error: %v\n", err)
 			os.Exit(0)
 		}
-
-		prettyPrint(response)
-
-		qrCode, err := b.GenerateQRCode(response.QrStartSecret, response.QrStartToken, 0)
-		if err != nil {
-			fmt.Printf("Error generating QR Code: %v\n", err)
-			os.Exit(0)
-		}
-		
-		config := qrterminal.Config{
+			
+		qrConfig := qrterminal.Config{
 			HalfBlocks: true,
 			Level: qrterminal.L,
 			QuietZone: 2,
@@ -89,32 +81,49 @@ var authCommand = &cobra.Command{
 			WhiteChar: qrterminal.BLACK_BLACK,
 			WhiteBlackChar: qrterminal.BLACK_WHITE,
 		}
-		
-		qrterminal.GenerateWithConfig(qrCode, config)
+
+		fmt.Printf("\nWaiting for authentication...\n")
+
+		start := time.Now().Unix()
 
 		for {
-			response, err := b.Collect(bankid.CollectRequest{
-				OrderRef: response.OrderRef,
+			now := time.Now().Unix()
+			diff := int(now - start)
+
+			qrCode, err := b.GenerateQRCode(authResponse.QrStartSecret, authResponse.QrStartToken, diff)
+			if err != nil {
+				fmt.Printf("Error generating QR Code: %v\n", err)
+				os.Exit(0)
+			}
+
+			if diff != 0 {
+				// removes the lines of the last QR code from stdout
+				fmt.Print("\033[23A\033[J")
+			}
+			qrterminal.GenerateWithConfig(qrCode, qrConfig)
+
+			collectResponse, err := b.Collect(bankid.CollectRequest{
+				OrderRef: authResponse.OrderRef,
 			})
 			if err != nil {
 				fmt.Printf("Error collecting status: %v\n", err)
 				os.Exit(0)
 			}
 
-			if response.Status == bankid.Pending {
-				time.Sleep(2 * time.Second)
-				fmt.Println("Waiting for authentication...")
+			if collectResponse.Status == bankid.Pending {
+				time.Sleep(1 * time.Second)
 				continue
 			}
 
-			if response.Status == bankid.Complete {
-				fmt.Printf("Authentication successful\n")
+			if collectResponse.Status == bankid.Complete {
+				fmt.Println("Authentication successful")
 
-				prettyPrint(response)
+				prettyPrint(collectResponse)
 				break
 			}
 
-			fmt.Printf("Authentication failed\n")
+			fmt.Println("Authentication failed")
+			prettyPrint(collectResponse)
 			break
 		}
 	},

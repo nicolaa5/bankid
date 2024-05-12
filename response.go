@@ -76,7 +76,7 @@ func (r PhoneSignResponse) Unmarshal(data []byte) error {
 //	}
 type CollectResponse struct {
 	OrderRef       string         `json:"orderRef"`
-	Status         Status         `json:"status"`
+	Status         Status         `json:"status,omitempty"`
 	HintCode       HintCode       `json:"hintCode,omitempty"`
 	CompletionData CompletionData `json:"completionData,omitempty"`
 }
@@ -86,24 +86,24 @@ func (r CollectResponse) Unmarshal(data []byte) error {
 }
 
 type User struct {
-	PersonalNumber string `json:"personalNumber"`
-	Name           string `json:"name"`
-	GivenName      string `json:"givenName"`
-	Surname        string `json:"surname"`
+	PersonalNumber string `json:"personalNumber,omitempty"`
+	Name           string `json:"name,omitempty"`
+	GivenName      string `json:"givenName,omitempty"`
+	Surname        string `json:"surname,omitempty"`
 }
 
 type Device struct {
-	IpAddress string `json:"ipAddress"`
-	Uhi       string `json:"uhi"`
+	IpAddress string `json:"ipAddress,omitempty"`
+	Uhi       string `json:"uhi,omitempty"`
 }
 
 type CompletionData struct {
-	User            User   `json:"user"`
-	Device          Device `json:"device"`
-	BankIdIssueDate string `json:"bankIdIssueDate"`
-	StepUp          bool   `json:"stepUp"`
-	Signature       string `json:"signature"`
-	OcspResponse    string `json:"ocspResponse"`
+	User            User   `json:"user,omitempty"`
+	Device          Device `json:"device,omitempty"`
+	BankIdIssueDate string `json:"bankIdIssueDate,omitempty"`
+	StepUp          bool   `json:"stepUp,omitempty"`
+	Signature       string `json:"signature,omitempty"`
+	OcspResponse    string `json:"ocspResponse,omitempty"`
 }
 
 type Status string
