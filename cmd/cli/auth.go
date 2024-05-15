@@ -7,15 +7,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/AlecAivazis/survey/v2"
+	// "github.com/AlecAivazis/survey/v2"
 	"github.com/mdp/qrterminal"
 	"github.com/nicolaa5/bankid"
 	"github.com/spf13/cobra"
 )
 
 
-var personNummer string
 var endUserIp string
+var personNummer string
+var userVisibleData string
 
 var authCommand = &cobra.Command{
 	Use:   "auth",
@@ -23,31 +24,6 @@ var authCommand = &cobra.Command{
 	Long: `Use the /auth endpoint to authenticate a user and get a QR code to scan.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		
-		if personNummer == "" {
-			prompt := &survey.Input{
-				Message: "Please enter the personnummer of the user to authenticate:",
-			}
-
-			survey.AskOne(
-				prompt, 
-				&personNummer, 
-				survey.WithValidator(survey.Required),
-			)
-		}
-
-		if endUserIp == "" {
-			prompt := &survey.Input{
-				Message: "Please provide the IP address of the Enduser:",
-			}
-
-			survey.AskOne(
-				prompt, 
-				&endUserIp, 
-				survey.WithValidator(survey.Required),
-			)
-		}
-		
 		b, err := bankid.New(bankid.Parameters{
 			URL: bankid.BankIDTestUrl,
 			Certificate: bankid.Certificate{
@@ -60,12 +36,17 @@ var authCommand = &cobra.Command{
 			log.Fatalf("Internal error in CLI app: %v", err)
 		}
 
-		authResponse, err := b.Auth(bankid.AuthRequest{
-			EndUserIP: endUserIp,
-			Requirement: bankid.Requirement{
-				PersonalNumber: personNummer,
-			},
-		})
+		request, err := bankid.NewRequest[bankid.AuthRequest](
+			bankid.WithEndUserIP(endUserIp),
+			bankid.WithUserVisibleData(userVisibleData),
+		)
+		if err != nil {
+			log.Fatalf("%v", err.Error())
+		}
+
+		prettyPrint(request)
+
+		authResponse, err := b.Auth(request)
 		if err != nil {
 			fmt.Printf("Response error: %v\n", err)
 			os.Exit(0)
@@ -74,7 +55,7 @@ var authCommand = &cobra.Command{
 		qrConfig := qrterminal.Config{
 			HalfBlocks: true,
 			Level: qrterminal.L,
-			QuietZone: 2,
+			QuietZone: 1,
 			Writer: os.Stdout,
 			BlackChar: qrterminal.WHITE_WHITE,
 			BlackWhiteChar: qrterminal.WHITE_BLACK,
@@ -82,7 +63,7 @@ var authCommand = &cobra.Command{
 			WhiteBlackChar: qrterminal.BLACK_WHITE,
 		}
 
-		fmt.Printf("\nWaiting for authentication...\n")
+		fmt.Printf("\n\nWaiting for authentication...\n\n")
 
 		start := time.Now().Unix()
 
@@ -98,8 +79,9 @@ var authCommand = &cobra.Command{
 
 			if diff != 0 {
 				// removes the lines of the last QR code from stdout
-				fmt.Print("\033[23A\033[J")
+				fmt.Print("\033[22A\033[J")
 			}
+
 			qrterminal.GenerateWithConfig(qrCode, qrConfig)
 
 			collectResponse, err := b.Collect(bankid.CollectRequest{
@@ -134,6 +116,7 @@ func init() {
 	rootCmd.AddCommand(authCommand)
 	authCommand.PersistentFlags().StringVarP(&personNummer, "personnummer", "p", "", "The personnummer of the user to authenticate")
 	authCommand.PersistentFlags().StringVarP(&endUserIp, "enduserip", "i", "", "The end user's IP address")
+	authCommand.PersistentFlags().StringVarP(&userVisibleData, "uservisibledata", "u", "", "The text shown to the enduser")
 }
 
 func prettyPrint(data interface{}) {

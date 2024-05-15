@@ -17,7 +17,7 @@ var (
 	SSLTestCertificate []byte
 )
 
-// This certificate is used to authenticate the client to the BankID API.
+// This certificate is used to authenticate the RP service to the BankID API.
 type Certificate struct {
 	// Required: The password for your SSLCertificate
 	Passphrase string `json:"passphrase"`

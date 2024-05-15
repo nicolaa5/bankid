@@ -2,7 +2,8 @@
     <img width=300 src="./bankid-go.png"/>
 </div>
 
-## 🇸🇪 BankID - API Client
+# 🇸🇪 BankID
+## Relying Party (RP) service
 ![ Unit Tests](https://github.com/nicolaa5/bankid/actions/workflows/unit.tests.yml/badge.svg)  
 
 ### Who is this repository for? 
