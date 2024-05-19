@@ -132,10 +132,8 @@ func (r PhoneAuthRequest) Marshal() ([]byte, error) {
 }
 
 type PhoneSignRequest struct {
-	// Required: The user IP address as seen by RP. String. IPv4 and IPv6 is allowed.
-	// Correct IP address must be the IP address representing the user agent (the end user device) as seen by the RP. In case of inbound proxy, special considerations may need to be taken into account to get the correct address.
-	// In some use cases the IP address is not available, for instance in voice-based services. In these cases, the internal representation of those systems’ IP address may be used.
-	EndUserIP string `json:"endUserIp"`
+	// Required: The personal number of the user. String. 12 digits.
+	PersonalNumber string `json:"personalNumber"`
 
 	// Required: Indicate if the user or the RP initiated the phone call.
 	// 	- user: user called the RP

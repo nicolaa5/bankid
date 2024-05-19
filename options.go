@@ -41,12 +41,6 @@ func WithEndUserIP(endUserIP string) Option {
 		case SignRequest:
 			v.EndUserIP = endUserIP
 			return v, nil
-		case PhoneAuthRequest:
-			v.EndUserIP = endUserIP
-			return v, nil 
-		case PhoneSignRequest:
-			v.EndUserIP = endUserIP
-			return v, nil 
 		}
 
 		return nil, fmt.Errorf("unkown type: %T", rb)
@@ -173,14 +167,6 @@ func WithReturnUrl(returnUrl string) Option {
 		case SignRequest:
 			v.ReturnUrl = returnUrl
 			return v, nil
-
-		case PhoneAuthRequest:
-			v.ReturnUrl = returnUrl
-			return v, nil
-			
-		case PhoneSignRequest:
-			v.ReturnUrl = returnUrl
-			return v, nil
 		}
 		
 		return nil, fmt.Errorf("unkown type: %T", rb)
@@ -200,14 +186,6 @@ func WithReturnRisk(returnRisk string) Option {
 			return v, nil
 
 		case SignRequest:
-			v.ReturnRisk = returnRisk
-			return v, nil
-
-		case PhoneAuthRequest:
-			v.ReturnRisk = returnRisk
-			return v, nil
-			
-		case PhoneSignRequest:
 			v.ReturnRisk = returnRisk
 			return v, nil
 		}
