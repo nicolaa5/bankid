@@ -121,7 +121,7 @@ func TestErrorCodes(t *testing.T) {
 				//first request
 				_, err := b.Auth(bankid.AuthRequest{
 					EndUserIP: ip,
-					Requirement: bankid.Requirement{
+					Requirement: &bankid.Requirement{
 						PersonalNumber: personNummer,
 					},
 				})
@@ -130,7 +130,7 @@ func TestErrorCodes(t *testing.T) {
 				//second request with the same personNummer
 				_, err = b.Auth(bankid.AuthRequest{
 					EndUserIP: ip,
-					Requirement: bankid.Requirement{
+					Requirement: &bankid.Requirement{
 						PersonalNumber: personNummer,
 					},
 				})

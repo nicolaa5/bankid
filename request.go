@@ -19,7 +19,7 @@ type AuthRequest struct {
 	EndUserIP string `json:"endUserIp"`
 
 	// Optional: Requirements on how the auth order must be performed.
-	Requirement Requirement `json:"requirement,omitempty"`
+	Requirement *Requirement `json:"requirement,omitempty"`
 
 	// Optional: Text displayed to the user during authentication with BankID, with the purpose of providing context for the authentication
 	// and to enable users to detect identification errors and averting fraud attempts.
@@ -67,7 +67,7 @@ type SignRequest struct {
 	UserVisibleData string `json:"userVisibleData"`
 
 	// Optional: Requirements on how the auth order must be performed. See section Requirements below for more details.
-	Requirement Requirement `json:"requirement,omitempty"`
+	Requirement *Requirement `json:"requirement,omitempty"`
 
 	// Optional: Data is not displayed to the user. String. The value must be base 64-encoded. 1-1 500 characters after base 64-encoding.
 	UserNonVisibleData string `json:"userNonVisibleData,omitempty"`
@@ -75,7 +75,24 @@ type SignRequest struct {
 	// Optional: If present, and set to “simpleMarkdownV1”, this parameter indicates that userVisibleData holds formatting characters which,
 	// will potentially make the text displayed to the user nicer to look at.
 	// For instructions check out https://www.bankid.com/utvecklare/guider/formatera-text
-	UserVisibleDataFormat string `json:"userVisibleDataFormat,omitempty"`
+	UserVisibleDataFormat string `json:"userVisibleDataFormat,omitempty"`	
+
+	// Optional: Orders started on the same device (started with autostart token) will call this URL when the order is completed, 
+	// ignoring any return URL provided in the start URL when the BankID app was launched.
+	// If the user has an old version of the  BankID mobile client that doesn’t support getting the returnUrl 
+	// from the server the user will be informed to update their client and the order will be cancelled.
+	// The return URL you provide should include a nonce to the session. 
+	// When the user returns to your app/webpage, your service should verify that the BankID transaction was completed successfully 
+	// and that the device receiving the returnUrl is the same as the device that started the transaction.
+	// Using this parameter will make your service more secure and strengthen the channel binding between you and the user.
+	// Check that cookie/ip hasn’t changed from starting page to returnUrl page. String 1- 512 character.
+	ReturnUrl string `json:"returnUrl,omitempty"`
+	
+	// Optional: If this is set to true, a risk indication will be included in the collect response when the order completes.
+	// The risk indication requires that the endUserIp is correct. 
+	// If your service provides an incorrect IP-address, legitimate transaction might be blocked and/or you might receive incorrect risk-data in the response.
+	// Boolean. Default is false.
+	ReturnRisk string `json:"returnRisk,omitempty"`
 }
 
 func (r SignRequest) Marshal() ([]byte, error) {
@@ -94,7 +111,7 @@ type PhoneAuthRequest struct {
 	CallInitiator string `json:"callInitiator"`
 
 	// Optional: Requirements on how the auth order must be performed.
-	Requirement Requirement `json:"requirement,omitempty"`
+	Requirement *Requirement `json:"requirement,omitempty"`
 
 	// Optional: Text displayed to the user during authentication with BankID, with the purpose of providing context for the authentication
 	// and to enable users to detect identification errors and averting fraud attempts.
@@ -126,7 +143,7 @@ type PhoneSignRequest struct {
 	CallInitiator string `json:"callInitiator"`
 
 	// Optional: Requirements on how the auth order must be performed. See section Requirements below for more details.
-	Requirement Requirement `json:"requirement,omitempty"`
+	Requirement *Requirement `json:"requirement,omitempty"`
 
 	// Required: Text to be displayed to the user. String. The text can be formatted using CR, LF and CRLF for new lines.
 	// The text must be encoded as UTF-8 and then base 64 encoded. 1 – 40,000 characters after base 64 encoding.

@@ -44,8 +44,6 @@ var authCommand = &cobra.Command{
 			log.Fatalf("%v", err.Error())
 		}
 
-		prettyPrint(request)
-
 		authResponse, err := b.Auth(request)
 		if err != nil {
 			fmt.Printf("Response error: %v\n", err)
