@@ -11,7 +11,7 @@ You can use this repo if you're using BankID in your organization for one of the
 - Authenticating users to use your services
 - Signing documents, transactions or payments related to your organization
 
-<img width=800 src="./authflow.png"/>
+<img width=800 src="./authflow.jpg"/>
 
 ### Setup
 For setup instructions from BankID visit [their integration guide](https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/rp-introduktion)
