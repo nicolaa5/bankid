@@ -25,6 +25,7 @@ func process[T RequestBody](opts ...ProcessOption) (T, error) {
 	return request, nil
 }
 
+// Ensures UserVisibleData will be base64 encoded if defined
 func processUserVisibleData(userVisibleData string) ProcessOption {
 	return func(rb RequestBody) (RequestBody, error) {
 
@@ -60,6 +61,7 @@ func processUserVisibleData(userVisibleData string) ProcessOption {
 	}
 }
 
+// Ensures UserNonVisibleData will be base64 encoded if defined
 func processUserNonVisibleData(userNonVisibleData string) ProcessOption {
 	return func(rb RequestBody) (RequestBody, error) {
 
@@ -95,6 +97,7 @@ func processUserNonVisibleData(userNonVisibleData string) ProcessOption {
 	}
 }
 
+// Ensures UserVisibleDataFormat is set to default markdown if input is empty
 func processUserVisibleDataFormat(userVisibleDataFormat string) ProcessOption {
 	return func(rb RequestBody) (RequestBody, error) {
 

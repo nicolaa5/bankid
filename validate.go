@@ -5,7 +5,7 @@ import (
 	"net"
 	"unicode/utf8"
 
-	"github.com/personnummer/go/v3"
+	personnummer "github.com/personnummer/go/v3"
 )
 
 type ValidateOption func() error
@@ -32,7 +32,7 @@ func handleOption(opt ValidateOption) error {
 		return err
 	}
 
-	return nil 
+	return nil
 }
 
 func validateRequired(body RequestBody) ValidateOption {
@@ -150,9 +150,9 @@ func validateRequirement(requirement *Requirement) ValidateOption {
 	return func() error {
 		// bankid request requirements are optional so nil is accepted
 		if requirement == nil {
-			return nil 
+			return nil
 		}
-		
+
 		opts := []ValidateOption{
 			validatePersonalNumber(requirement.PersonalNumber),
 			validateCertificatePolicies(requirement.CertificatePolicies),
@@ -165,10 +165,24 @@ func validateRequirement(requirement *Requirement) ValidateOption {
 			}
 		}
 
-		return nil 
+		return nil
 	}
 }
 
+func validateParameters(p Config) ValidateOption {
+	return func() error {
+
+		if p.SSLCertificate == nil {
+			return InputInvalidError{Message: fmt.Sprint("ssl certificate is not provided")}
+		}
+
+		if p.CACertificate == nil {
+			return InputInvalidError{Message: fmt.Sprint("ca root certificate is not provided")}
+		}
+
+		return nil
+	}
+}
 
 func isValidIP(ip string) bool {
 	parsedIP := net.ParseIP(ip)

@@ -73,7 +73,7 @@ func request[T ResponseBody](ctx context.Context, p RequestParameters) (r *T, er
 	return r, nil
 }
 
-func newRequestConfig(params Parameters) (*RequestConfig, error) {
+func newRequestConfig(params Config) (*RequestConfig, error) {
 	// Decode the .p12 certificate into a private key and the certificate
 	key, cert, err := pkcs12.Decode(params.SSLCertificate, params.Passphrase)
 	if err != nil {

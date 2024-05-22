@@ -23,7 +23,7 @@ func TestCertPaths(t *testing.T) {
 func TestAuthenticate(t *testing.T) {
 	ctx := context.Background()
 
-	b, err := bankid.New(bankid.Parameters{
+	b, err := bankid.New(bankid.Config{
 		URL: bankid.BankIDTestUrl,
 		Certificate: bankid.Certificate{
 			Passphrase:     bankid.BankIDTestPassphrase,
@@ -74,7 +74,7 @@ func TestAuthenticate(t *testing.T) {
 func TestErrorCodes(t *testing.T) {
 	ctx := context.Background()
 
-	b, err := bankid.New(bankid.Parameters{
+	b, err := bankid.New(bankid.Config{
 		URL: bankid.BankIDTestUrl,
 		Certificate: bankid.Certificate{
 			Passphrase:     bankid.BankIDTestPassphrase,
@@ -147,7 +147,7 @@ func TestErrorCodes(t *testing.T) {
 				require.Equal(t, e.ErrorCode, bankid.AlreadyInProgress)
 
 			case bankid.NotFound:
-				b, err := bankid.New(bankid.Parameters{
+				b, err := bankid.New(bankid.Config{
 					// add non-existent path to URL
 					URL: "https://appapi2.test.bankid.com/rp/v6.0/forbidden/path",
 					Certificate: bankid.Certificate{

@@ -41,6 +41,18 @@ type CertificatePaths struct {
 	CACertificatePath string `json:"caCertificatePath"`
 }
 
+func (c Certificate) Validate() error {
+	if c.SSLCertificate == nil {
+		return fmt.Errorf("ssl certificate is not provided")
+	}
+
+	if c.CACertificate == nil {
+		return fmt.Errorf("ca root certificate is not provided")
+	}
+
+	return nil
+}
+
 func CertificateFromPaths(params CertificatePaths) (*Certificate, error) {
 	if params.Passphrase == "" {
 		return nil, fmt.Errorf("passphrase is required")

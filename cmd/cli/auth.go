@@ -76,7 +76,7 @@ var authCommand = &cobra.Command{
 
 		var b bankid.BankID
 		if test {
-			client, err := bankid.New(bankid.Parameters{
+			client, err := bankid.New(bankid.Config{
 				URL: bankid.BankIDTestUrl,
 				Certificate: bankid.Certificate{
 					Passphrase:     bankid.BankIDTestPassphrase,
@@ -101,7 +101,7 @@ var authCommand = &cobra.Command{
 				log.Fatalf("Input error: %v", err)
 			}
 
-			client, err := bankid.New(bankid.Parameters{
+			client, err := bankid.New(bankid.Config{
 				URL:         bankid.BankIDURL,
 				Certificate: *cert,
 			})

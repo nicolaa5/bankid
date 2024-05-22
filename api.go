@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+const (
+	BankIDURL            = "https://appapi2.bankid.com/rp/v6.0"
+	BankIDTestUrl        = "https://appapi2.test.bankid.com/rp/v6.0"
+	BankIDTestPassphrase = "qwerty123"
+)
+
 // BankID is an interface for interacting with the BankID API.
 // You can use it to authenticate users and sign using BankID.
 // Documentation: https://www.bankid.com/en/utvecklare
@@ -80,13 +86,35 @@ type bankid struct {
 	config *RequestConfig
 }
 
-func New(input Parameters) (BankID, error) {
-	err := input.Validate()
+type Config struct {
+	// Required: The SSL & CA certificate for the client.
+	Certificate
+
+	// Optional: The URL to BankID API, can be set to the test or production endpoint.
+	// Default: "https://appapi2.bankid.com/rp/v6.0"
+	URL string `json:"url"`
+
+	// Optional: The timeout for the request to BankID API in seconds.
+	// Default: 5
+	Timeout int `json:"timeout"`
+}
+
+func New(p Config) (BankID, error) {
+	if p.URL == "" {
+		// Set the URL to the default production endpoint if not provided
+		p.URL = BankIDURL
+	}
+
+	// Set the timeout to 5 seconds if not provided
+	if p.Timeout == 0 {
+		p.Timeout = 5
+	}
+
+	err := p.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("error validating parameters: %w", err)
 	}
-
-	c, err := newRequestConfig(input)
+	c, err := newRequestConfig(p)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new config: %w", err)
 	}
@@ -112,14 +140,14 @@ func GenerateQrPayload(qrStartSecret string, qrStartToken string, timeInSeconds 
 }
 
 // Initiates an authentication order. Use the collect method to query the status of the order.
-func (b *bankid) Auth(ctx context.Context, req AuthRequest) (*AuthResponse, error) {	
+func (b *bankid) Auth(ctx context.Context, req AuthRequest) (*AuthResponse, error) {
 	err := validate(
 		validateRequired(req),
 		validateEndUserIP(req.EndUserIP),
 		validateRequirement(req.Requirement),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("input error: %w", err)
+		return nil, fmt.Errorf("input validation error: %w", err)
 	}
 
 	req, err = process[AuthRequest](
@@ -146,7 +174,7 @@ func (b *bankid) Sign(ctx context.Context, req SignRequest) (*SignResponse, erro
 		validateRequirement(req.Requirement),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("input error: %w", err)
+		return nil, fmt.Errorf("input validation error: %w", err)
 	}
 
 	req, err = process[SignRequest](
@@ -174,7 +202,7 @@ func (b *bankid) PhoneAuth(ctx context.Context, req PhoneAuthRequest) (*PhoneAut
 		validateRequirement(req.Requirement),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("input error: %w", err)
+		return nil, fmt.Errorf("input validation error: %w", err)
 	}
 
 	req, err = process[PhoneAuthRequest](
@@ -202,7 +230,7 @@ func (b *bankid) PhoneSign(ctx context.Context, req PhoneSignRequest) (*PhoneSig
 		validateRequirement(req.Requirement),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("input error: %w", err)
+		return nil, fmt.Errorf("input validation error: %w", err)
 	}
 
 	req, err = process[PhoneSignRequest](
