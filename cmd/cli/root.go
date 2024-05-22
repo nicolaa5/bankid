@@ -11,7 +11,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "bankid",
 	Short: "Command line interface to interact with bankid package",
-	Long: `Use this CLI as a frontend client to generate QR codes and interact with the BankID API.`,
+	Long:  `Use this CLI as a frontend client to generate QR codes and interact with the BankID API.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 
@@ -26,7 +26,7 @@ var rootCmd = &cobra.Command{
 		}
 		survey.AskOne(prompt, &endpoint, survey.WithValidator(survey.Required))
 
-		switch(endpoint) {
+		switch endpoint {
 		case "/auth":
 			authCommand.Run(cmd, args)
 		}

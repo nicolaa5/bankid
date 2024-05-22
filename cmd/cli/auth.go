@@ -111,21 +111,6 @@ var authCommand = &cobra.Command{
 			b = client
 		}
 
-		request, err := bankid.NewRequest[bankid.AuthRequest](
-			bankid.WithEndUserIP(request.EndUserIP),
-			bankid.WithUserVisibleData(request.UserVisibleData),
-			bankid.WithUserNonVisibleData(request.UserNonVisibleData),
-			bankid.WithUserVisibleDataFormat(request.UserVisibleDataFormat),
-			bankid.WithCardReader(request.Requirement.CardReader),
-			bankid.WithCertificatePolicies(request.Requirement.CertificatePolicies),
-			bankid.WithMRTD(request.Requirement.MRTD),
-			bankid.WithPersonalNumber(request.Requirement.PersonalNumber),
-			bankid.WithPincode(request.Requirement.Pincode),
-		)
-		if err != nil {
-			log.Fatalf("New Request: %v", err.Error())
-		}
-
 		authResponse, err := b.Auth(request)
 		if err != nil {
 			fmt.Printf("Response error: %v\n", err)
