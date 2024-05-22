@@ -43,6 +43,16 @@ func (r AuthResponse) Unmarshal(data []byte) error {
 type SignResponse struct {
 	// Used to collect the status of the order.
 	OrderRef string `json:"orderRef"`
+
+	// Used to compile the start url according to launching.
+	// See https://www.bankid.com/utvecklare/guider/teknisk-integrationsguide/programstart
+	AutoStartToken string `json:"autoStartToken"`
+
+	// Used to compute the animated QR code.
+	QrStartToken string `json:"qrStartToken"`
+
+	// Used to compute the animated QR code.
+	QrStartSecret string `json:"qrStartSecret"`
 }
 
 func (r SignResponse) Unmarshal(data []byte) error {

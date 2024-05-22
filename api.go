@@ -49,13 +49,6 @@ type BankID interface {
 	// This is typically used if the user cancels the order in your service or app.
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/cancel
 	Cancel(request CancelRequest) (*CancelResponse, error)
-
-	// The pattern "bankid.qrStartToken.time.qrAuthCode" is used as a link in the QR code, where:
-	// 	- bankid is a fixed prefix.
-	// 	- qrStartToken is from the auth or sign response.
-	// 	- time is the number of seconds since the order was created from auth or sign was returned.
-	// 	- qrAuthCode is computed as HMACSHA256(qrStartSecret, time) where time is the number of seconds since the response from auth or sign was returned and qrStartSecret is from the auth or sign response.
-	GenerateQRCode(qrStartSecret string, qrStartToken string, timeInSeconds int) (string, error)
 }
 
 type bankid struct {
@@ -79,7 +72,7 @@ func New(input Parameters) (BankID, error) {
 }
 
 // The pattern "bankid.qrStartToken.time.qrAuthCode" is used as a link in the QR code
-func (b *bankid) GenerateQRCode(qrStartSecret string, qrStartToken string, timeInSeconds int) (string, error) {
+func GenerateQrPayload(qrStartSecret string, qrStartToken string, timeInSeconds int) (string, error) {
 	hash := hmac.New(sha256.New, []byte(qrStartSecret))
 	_, err := hash.Write([]byte(fmt.Sprintf("%d", timeInSeconds)))
 	if err != nil {

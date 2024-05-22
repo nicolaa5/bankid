@@ -33,23 +33,6 @@ type AuthRequest struct {
 	// will potentially make the text displayed to the user nicer to look at.
 	// For instructions check out https://www.bankid.com/utvecklare/guider/formatera-text
 	UserVisibleDataFormat string `json:"userVisibleDataFormat,omitempty"`
-	
-	// Optional: Orders started on the same device (started with autostart token) will call this URL when the order is completed, 
-	// ignoring any return URL provided in the start URL when the BankID app was launched.
-	// If the user has an old version of the  BankID mobile client that doesn’t support getting the returnUrl 
-	// from the server the user will be informed to update their client and the order will be cancelled.
-	// The return URL you provide should include a nonce to the session. 
-	// When the user returns to your app/webpage, your service should verify that the BankID transaction was completed successfully 
-	// and that the device receiving the returnUrl is the same as the device that started the transaction.
-	// Using this parameter will make your service more secure and strengthen the channel binding between you and the user.
-	// Check that cookie/ip hasn’t changed from starting page to returnUrl page. String 1- 512 character.
-	ReturnUrl string `json:"returnUrl,omitempty"`
-	
-	// Optional: If this is set to true, a risk indication will be included in the collect response when the order completes.
-	// The risk indication requires that the endUserIp is correct. 
-	// If your service provides an incorrect IP-address, legitimate transaction might be blocked and/or you might receive incorrect risk-data in the response.
-	// Boolean. Default is false.
-	ReturnRisk string `json:"returnRisk,omitempty"`
 }
 
 func (r AuthRequest) Marshal() ([]byte, error) {
@@ -75,24 +58,7 @@ type SignRequest struct {
 	// Optional: If present, and set to “simpleMarkdownV1”, this parameter indicates that userVisibleData holds formatting characters which,
 	// will potentially make the text displayed to the user nicer to look at.
 	// For instructions check out https://www.bankid.com/utvecklare/guider/formatera-text
-	UserVisibleDataFormat string `json:"userVisibleDataFormat,omitempty"`	
-
-	// Optional: Orders started on the same device (started with autostart token) will call this URL when the order is completed, 
-	// ignoring any return URL provided in the start URL when the BankID app was launched.
-	// If the user has an old version of the  BankID mobile client that doesn’t support getting the returnUrl 
-	// from the server the user will be informed to update their client and the order will be cancelled.
-	// The return URL you provide should include a nonce to the session. 
-	// When the user returns to your app/webpage, your service should verify that the BankID transaction was completed successfully 
-	// and that the device receiving the returnUrl is the same as the device that started the transaction.
-	// Using this parameter will make your service more secure and strengthen the channel binding between you and the user.
-	// Check that cookie/ip hasn’t changed from starting page to returnUrl page. String 1- 512 character.
-	ReturnUrl string `json:"returnUrl,omitempty"`
-	
-	// Optional: If this is set to true, a risk indication will be included in the collect response when the order completes.
-	// The risk indication requires that the endUserIp is correct. 
-	// If your service provides an incorrect IP-address, legitimate transaction might be blocked and/or you might receive incorrect risk-data in the response.
-	// Boolean. Default is false.
-	ReturnRisk string `json:"returnRisk,omitempty"`
+	UserVisibleDataFormat string `json:"userVisibleDataFormat,omitempty"`
 }
 
 func (r SignRequest) Marshal() ([]byte, error) {
@@ -228,12 +194,4 @@ type Requirement struct {
 	// A personal identification number to be used to complete the transaction.
 	// If a BankID with another personal number attempts to sign the transaction, it fails.
 	PersonalNumber string `json:"personalNumber,omitempty"`
-	
-	// Set the acceptable risk level for the transaction. If the risk is higher than the specified level, the transaction will be blocked.
-	// String:
-	// 	- low: only accept low risk orders
-	// 	- moderate: accept low and moderate risk orders
-	// The risk indication requires that the endUserIp is correct. An incorrect IP-address will result in legitimate transactions being blocked.
-	// Default no risk level is set and the BankID service will not block any order regardless of the risk indication.
-	Risk string `json:"risk,omitempty"`
 }
