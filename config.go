@@ -25,7 +25,7 @@ func (c *Config) EnsureRequired() {
 		c.Timeout = 5
 	}
 
-	// Use the BankID CA root certificate by default for requests 
+	// Use the BankID CA root certificate by default for requests
 	if c.CACertificate == nil && c.URL == BankIDURL {
 		c.CACertificate = CAProdCertificate
 	}

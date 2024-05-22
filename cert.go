@@ -58,6 +58,6 @@ func SSLCertificateFromPath(path string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error reading .p12 file: %w", err)
 	}
-	
-	return p12, nil 
+
+	return p12, nil
 }

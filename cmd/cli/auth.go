@@ -88,9 +88,9 @@ var authCommand = &cobra.Command{
 			}
 
 			client, err := bankid.New(bankid.Config{
-				URL:         bankid.BankIDURL,
+				URL: bankid.BankIDURL,
 				Certificate: bankid.Certificate{
-					Passphrase: passphrase,
+					Passphrase:     passphrase,
 					SSLCertificate: sslCert,
 				},
 			})
