@@ -1,10 +1,12 @@
 package bankid
 
 import (
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"time"
 )
 
 // BankID is an interface for interacting with the BankID API.
@@ -45,10 +47,17 @@ type BankID interface {
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/collect
 	Collect(request CollectRequest) (*CollectResponse, error)
 
+	// 🫳 Continuously collects every 2 second in a goroutine for as long as the order is pending
+	// Collects the result of a sign or auth order using orderRef as reference
+	// RP must abort if status indicates failed. The user identity is returned when complete.
+	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/collect
+	CollectRoutine(ctx context.Context, orderRef string, output chan *CollectResponse)
+
 	// ✋ Cancels an ongoing sign or auth order.
 	// This is typically used if the user cancels the order in your service or app.
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/cancel
 	Cancel(request CancelRequest) (*CancelResponse, error)
+
 }
 
 type bankid struct {
@@ -117,6 +126,15 @@ func (b *bankid) PhoneSign(req PhoneSignRequest) (*PhoneSignResponse, error) {
 	})
 }
 
+// Cancels an ongoing sign or auth order.
+func (b *bankid) Cancel(req CancelRequest) (*CancelResponse, error) {
+	return request[CancelResponse](RequestParameters{
+		Path:   "/cancel",
+		Config: b.config,
+		Body:   req,
+	})
+}
+
 // Collects the result of a sign or auth order using orderRef as reference.
 func (b *bankid) Collect(req CollectRequest) (*CollectResponse, error) {
 	return request[CollectResponse](RequestParameters{
@@ -126,11 +144,31 @@ func (b *bankid) Collect(req CollectRequest) (*CollectResponse, error) {
 	})
 }
 
-// Cancels an ongoing sign or auth order.
-func (b *bankid) Cancel(req CancelRequest) (*CancelResponse, error) {
-	return request[CancelResponse](RequestParameters{
-		Path:   "/cancel",
-		Config: b.config,
-		Body:   req,
-	})
+// A goroutine that checks the /collect endpoint every 1 second and returns the response in a channel
+func (b *bankid) CollectRoutine(ctx context.Context, orderRef string, response chan *CollectResponse) {
+	defer close(response)
+
+	for {
+        select {
+        case <-ctx.Done():
+            return
+		default:
+			collectResponse, err := b.Collect(CollectRequest{
+				OrderRef: orderRef,
+			})
+			if err != nil {
+				fmt.Printf("Error collecting status: %v\n", err)
+				return
+			}
+
+			response <- collectResponse
+
+			if collectResponse.Status == Pending {
+				time.Sleep(2 * time.Second)
+				continue
+			}
+
+			return
+		}
+	}
 }

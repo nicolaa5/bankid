@@ -10,7 +10,7 @@ import (
 )
 
 // Display a QR code in the terminal, generated from QR secret and token received in the /auth and /sign endpoints
-func DisplayTerminalQR(qrStartSecret, qrStartToken string, timeDifference int) {
+func displayTerminalQR(qrStartSecret, qrStartToken string, timeDifference int) {
 	qrConfig := qrterminal.Config{
 		HalfBlocks:     true,
 		Level:          qrterminal.L,
@@ -25,7 +25,7 @@ func DisplayTerminalQR(qrStartSecret, qrStartToken string, timeDifference int) {
 	qrCode, err := bankid.GenerateQrPayload(qrStartSecret, qrStartToken, timeDifference)
 	if err != nil {
 		fmt.Printf("Error generating QR Code: %v\n", err)
-		return 
+		return
 	}
 
 	_, height, err := term.GetSize(0)
