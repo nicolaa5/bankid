@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"testing"
@@ -20,6 +21,8 @@ func TestCertPaths(t *testing.T) {
 }
 
 func TestAuthenticate(t *testing.T) {
+	ctx := context.Background()
+
 	b, err := bankid.New(bankid.Parameters{
 		URL: bankid.BankIDTestUrl,
 		Certificate: bankid.Certificate{
@@ -40,7 +43,7 @@ func TestAuthenticate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			authResponse, err := b.Auth(bankid.AuthRequest{
+			authResponse, err := b.Auth(ctx, bankid.AuthRequest{
 				EndUserIP: randomIPv4(),
 			})
 
@@ -50,7 +53,7 @@ func TestAuthenticate(t *testing.T) {
 			require.NotEmpty(t, authResponse.QrStartSecret)
 			require.NotEmpty(t, authResponse.QrStartToken)
 
-			collectResponse, err := b.Collect(bankid.CollectRequest{
+			collectResponse, err := b.Collect(ctx, bankid.CollectRequest{
 				OrderRef: authResponse.OrderRef,
 			})
 
@@ -59,7 +62,7 @@ func TestAuthenticate(t *testing.T) {
 			require.Equal(t, collectResponse.Status, bankid.Pending)
 			require.Equal(t, collectResponse.HintCode, bankid.OutstandingTransaction)
 
-			_, err = b.Cancel(bankid.CancelRequest{
+			_, err = b.Cancel(ctx, bankid.CancelRequest{
 				OrderRef: authResponse.OrderRef,
 			})
 
@@ -69,6 +72,8 @@ func TestAuthenticate(t *testing.T) {
 }
 
 func TestErrorCodes(t *testing.T) {
+	ctx := context.Background()
+
 	b, err := bankid.New(bankid.Parameters{
 		URL: bankid.BankIDTestUrl,
 		Certificate: bankid.Certificate{
@@ -94,7 +99,7 @@ func TestErrorCodes(t *testing.T) {
 			switch test.expected.ErrorCode {
 			case bankid.InvalidParameters:
 				//empty invalid IP as EndUserIP
-				_, err := b.Auth(bankid.AuthRequest{
+				_, err := b.Auth(ctx, bankid.AuthRequest{
 					EndUserIP: "",
 				})
 				require.Error(t, err)
@@ -105,7 +110,7 @@ func TestErrorCodes(t *testing.T) {
 
 				//using non-existent orderRef
 				uniqueID := uuid.New()
-				_, err = b.Collect(bankid.CollectRequest{
+				_, err = b.Collect(ctx, bankid.CollectRequest{
 					OrderRef: uniqueID.String(),
 				})
 				require.Error(t, err)
@@ -119,7 +124,7 @@ func TestErrorCodes(t *testing.T) {
 				personNummer := randomPersonnummer()
 
 				//first request
-				_, err := b.Auth(bankid.AuthRequest{
+				_, err := b.Auth(ctx, bankid.AuthRequest{
 					EndUserIP: ip,
 					Requirement: &bankid.Requirement{
 						PersonalNumber: personNummer,
@@ -128,7 +133,7 @@ func TestErrorCodes(t *testing.T) {
 				require.NoError(t, err)
 
 				//second request with the same personNummer
-				_, err = b.Auth(bankid.AuthRequest{
+				_, err = b.Auth(ctx, bankid.AuthRequest{
 					EndUserIP: ip,
 					Requirement: &bankid.Requirement{
 						PersonalNumber: personNummer,
@@ -153,7 +158,7 @@ func TestErrorCodes(t *testing.T) {
 				})
 				require.NoError(t, err)
 
-				_, err = b.Auth(bankid.AuthRequest{
+				_, err = b.Auth(ctx, bankid.AuthRequest{
 					EndUserIP: randomIPv4(),
 				})
 				require.Error(t, err)

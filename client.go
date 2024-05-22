@@ -2,6 +2,7 @@ package bankid
 
 import (
 	"bytes"
+	"context"
 	"crypto"
 	"crypto/tls"
 	"crypto/x509"
@@ -30,7 +31,7 @@ type RequestParameters struct {
 }
 
 // request sends a request to the BankID API and handles and returns the response or error.
-func request[T ResponseBody](p RequestParameters) (r *T, err error) {
+func request[T ResponseBody](ctx context.Context, p RequestParameters) (r *T, err error) {
 	b, err := p.Body.Marshal()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling body: %w", err)

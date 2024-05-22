@@ -20,7 +20,7 @@ type BankID interface {
 	// 	- qrStartToken
 	// 	- qrStartSecret
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/auth
-	Auth(request AuthRequest) (*AuthResponse, error)
+	Auth(ctx context.Context, request AuthRequest) (*AuthResponse, error)
 
 	// 🖋️ Initiates an signing order.
 	// Use the collect method to query the status of the order. If the request is successful the response includes:
@@ -29,23 +29,23 @@ type BankID interface {
 	// 	- qrStartToken
 	// 	- qrStartSecret
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/sign
-	Sign(request SignRequest) (*SignResponse, error)
+	Sign(ctx context.Context, request SignRequest) (*SignResponse, error)
 
 	// 🗝️ Initiates an authentication order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-auth
-	PhoneAuth(request PhoneAuthRequest) (*PhoneAuthResponse, error)
+	PhoneAuth(ctx context.Context, request PhoneAuthRequest) (*PhoneAuthResponse, error)
 
 	// 🖋️ Initiates an signing order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-sign
-	PhoneSign(request PhoneSignRequest) (*PhoneSignResponse, error)
+	PhoneSign(ctx context.Context, request PhoneSignRequest) (*PhoneSignResponse, error)
 
 	// 🫳 Collects the result of a sign or auth order using orderRef as reference.
 	// RP should keep on calling collect every two seconds if status is pending.
 	// RP must abort if status indicates failed. The user identity is returned when complete.
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/collect
-	Collect(request CollectRequest) (*CollectResponse, error)
+	Collect(ctx context.Context, request CollectRequest) (*CollectResponse, error)
 
 	// 🫳 Continuously calls the /collect endpoint (every 2 seconds) in a goroutine for as long as the order is pending
 	// Collects the result of a sign or auth order using orderRef as reference
@@ -73,7 +73,7 @@ type BankID interface {
 	// ✋ Cancels an ongoing sign or auth order.
 	// This is typically used if the user cancels the order in your service or app.
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/cancel
-	Cancel(request CancelRequest) (*CancelResponse, error)
+	Cancel(ctx context.Context, request CancelRequest) (*CancelResponse, error)
 }
 
 type bankid struct {
@@ -112,7 +112,7 @@ func GenerateQrPayload(qrStartSecret string, qrStartToken string, timeInSeconds 
 }
 
 // Initiates an authentication order. Use the collect method to query the status of the order.
-func (b *bankid) Auth(req AuthRequest) (*AuthResponse, error) {	
+func (b *bankid) Auth(ctx context.Context, req AuthRequest) (*AuthResponse, error) {	
 	err := validate(
 		validateRequired(req),
 		validateEndUserIP(req.EndUserIP),
@@ -131,7 +131,7 @@ func (b *bankid) Auth(req AuthRequest) (*AuthResponse, error) {
 		return nil, fmt.Errorf("process error: %w", err)
 	}
 
-	return request[AuthResponse](RequestParameters{
+	return request[AuthResponse](ctx, RequestParameters{
 		Path:   "/auth",
 		Config: b.config,
 		Body:   req,
@@ -139,7 +139,7 @@ func (b *bankid) Auth(req AuthRequest) (*AuthResponse, error) {
 }
 
 // Initiates an signing order. Use the collect method to query the status of the order.
-func (b *bankid) Sign(req SignRequest) (*SignResponse, error) {
+func (b *bankid) Sign(ctx context.Context, req SignRequest) (*SignResponse, error) {
 	err := validate(
 		validateRequired(req),
 		validateEndUserIP(req.EndUserIP),
@@ -158,7 +158,7 @@ func (b *bankid) Sign(req SignRequest) (*SignResponse, error) {
 		return nil, fmt.Errorf("process error: %w", err)
 	}
 
-	return request[SignResponse](RequestParameters{
+	return request[SignResponse](ctx, RequestParameters{
 		Path:   "/sign",
 		Config: b.config,
 		Body:   req,
@@ -166,7 +166,7 @@ func (b *bankid) Sign(req SignRequest) (*SignResponse, error) {
 }
 
 // Initiates an authentication order when the user is talking to the RP over the phone.
-func (b *bankid) PhoneAuth(req PhoneAuthRequest) (*PhoneAuthResponse, error) {
+func (b *bankid) PhoneAuth(ctx context.Context, req PhoneAuthRequest) (*PhoneAuthResponse, error) {
 	err := validate(
 		validateRequired(req),
 		validatePersonalNumber(req.PersonalNumber),
@@ -186,7 +186,7 @@ func (b *bankid) PhoneAuth(req PhoneAuthRequest) (*PhoneAuthResponse, error) {
 		return nil, fmt.Errorf("process error: %w", err)
 	}
 
-	return request[PhoneAuthResponse](RequestParameters{
+	return request[PhoneAuthResponse](ctx, RequestParameters{
 		Path:   "/phone/auth",
 		Config: b.config,
 		Body:   req,
@@ -194,7 +194,7 @@ func (b *bankid) PhoneAuth(req PhoneAuthRequest) (*PhoneAuthResponse, error) {
 }
 
 // Initiates an signing order when the user is talking to the RP over the phone.
-func (b *bankid) PhoneSign(req PhoneSignRequest) (*PhoneSignResponse, error) {
+func (b *bankid) PhoneSign(ctx context.Context, req PhoneSignRequest) (*PhoneSignResponse, error) {
 	err := validate(
 		validateRequired(req),
 		validatePersonalNumber(req.PersonalNumber),
@@ -214,7 +214,7 @@ func (b *bankid) PhoneSign(req PhoneSignRequest) (*PhoneSignResponse, error) {
 		return nil, fmt.Errorf("process error: %w", err)
 	}
 
-	return request[PhoneSignResponse](RequestParameters{
+	return request[PhoneSignResponse](ctx, RequestParameters{
 		Path:   "/phone/sign",
 		Config: b.config,
 		Body:   req,
@@ -222,8 +222,8 @@ func (b *bankid) PhoneSign(req PhoneSignRequest) (*PhoneSignResponse, error) {
 }
 
 // Cancels an ongoing sign or auth order.
-func (b *bankid) Cancel(req CancelRequest) (*CancelResponse, error) {
-	return request[CancelResponse](RequestParameters{
+func (b *bankid) Cancel(ctx context.Context, req CancelRequest) (*CancelResponse, error) {
+	return request[CancelResponse](ctx, RequestParameters{
 		Path:   "/cancel",
 		Config: b.config,
 		Body:   req,
@@ -231,8 +231,8 @@ func (b *bankid) Cancel(req CancelRequest) (*CancelResponse, error) {
 }
 
 // Collects the result of a sign or auth order using orderRef as reference.
-func (b *bankid) Collect(req CollectRequest) (*CollectResponse, error) {
-	return request[CollectResponse](RequestParameters{
+func (b *bankid) Collect(ctx context.Context, req CollectRequest) (*CollectResponse, error) {
+	return request[CollectResponse](ctx, RequestParameters{
 		Path:   "/collect",
 		Config: b.config,
 		Body:   req,
@@ -249,7 +249,7 @@ func (b *bankid) CollectRoutine(ctx context.Context, request CollectRequest, res
 		case <-ctx.Done():
 			return
 		default:
-			collectResponse, err := b.Collect(request)
+			collectResponse, err := b.Collect(ctx, request)
 			if err != nil {
 				fmt.Printf("Error collecting status: %v\n", err)
 				return

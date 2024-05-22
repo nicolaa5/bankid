@@ -111,7 +111,7 @@ var authCommand = &cobra.Command{
 			b = client
 		}
 
-		authResponse, err := b.Auth(request)
+		authResponse, err := b.Auth(cmd.Context(), request)
 		if err != nil {
 			fmt.Printf("Response error: %v\n", err)
 			os.Exit(0)
