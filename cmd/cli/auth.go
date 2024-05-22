@@ -133,17 +133,23 @@ var authCommand = &cobra.Command{
 		}
 
 		response := make(chan *bankid.CollectResponse)
-		quit := make(chan struct{})
 
 		fmt.Printf("\n\nWaiting for user to authenticate using BankID...\n\n")
 
-		// keep collecting the status of the order
-		go b.CollectRoutine(cmd.Context(), authResponse.OrderRef, response)
+		req := bankid.CollectRequest{
+			OrderRef: authResponse.OrderRef,
+		}
+
+		// continuously collect the status of the order
+		go b.CollectRoutine(cmd.Context(), req, response)
 
 		start := time.Now().Unix()
 
 		for {
 			select {
+			case <-cmd.Context().Done():
+				return
+
 			case collectResponse, ok := <-response:
 				if !ok {
 					continue
@@ -156,13 +162,10 @@ var authCommand = &cobra.Command{
 
 				if collectResponse.Status == bankid.Complete {
 					fmt.Println("Authentication successful")
-					prettyPrint(collectResponse.CompletionData)
+					prettyPrint(collectResponse.CompletionData.User)
 				} else if collectResponse.Status == bankid.Failed {
 					fmt.Printf("\nAuthentication failed, reason: %s\n", collectResponse.HintCode)
 				}
-
-			case <-quit:
-				return
 			default:
 
 			}
