@@ -25,6 +25,7 @@ type BankID interface {
 	// 	- autoStartToken
 	// 	- qrStartToken
 	// 	- qrStartSecret
+	// 
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/auth
 	Auth(ctx context.Context, request AuthRequest) (*AuthResponse, error)
 
@@ -34,22 +35,26 @@ type BankID interface {
 	// 	- autoStartToken
 	// 	- qrStartToken
 	// 	- qrStartSecret
+	// 
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/sign
 	Sign(ctx context.Context, request SignRequest) (*SignResponse, error)
 
 	// 🗝️ Initiates an authentication order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
+	// 
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-auth
 	PhoneAuth(ctx context.Context, request PhoneAuthRequest) (*PhoneAuthResponse, error)
 
 	// 🖋️ Initiates an signing order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
+	// 
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-sign
 	PhoneSign(ctx context.Context, request PhoneSignRequest) (*PhoneSignResponse, error)
 
 	// 🫳 Collects the result of a sign or auth order using orderRef as reference.
 	// RP should keep on calling collect every two seconds if status is pending.
 	// RP must abort if status indicates failed. The user identity is returned when complete.
+	// 
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/collect
 	Collect(ctx context.Context, request CollectRequest) (*CollectResponse, error)
 
@@ -78,6 +83,7 @@ type BankID interface {
 
 	// ✋ Cancels an ongoing sign or auth order.
 	// This is typically used if the user cancels the order in your service or app.
+	// 
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/cancel
 	Cancel(ctx context.Context, request CancelRequest) (*CancelResponse, error)
 }
@@ -86,35 +92,36 @@ type bankid struct {
 	config *RequestConfig
 }
 
-type Config struct {
-	// Required: The SSL & CA certificate for the client.
-	Certificate
+func New(config Config) (BankID, error) {
+	config.EnsureRequired()
 
-	// Optional: The URL to BankID API, can be set to the test or production endpoint.
-	// Default: "https://appapi2.bankid.com/rp/v6.0"
-	URL string `json:"url"`
+	err := config.Validate()
+	if err != nil {
+		return nil, fmt.Errorf("error validating input config: %w", err)
+	}
 
-	// Optional: The timeout for the request to BankID API in seconds.
-	// Default: 5
-	Timeout int `json:"timeout"`
+	c, err := newRequestConfig(config)
+	if err != nil {
+		return nil, fmt.Errorf("error creating new config: %w", err)
+	}
+
+	return &bankid{
+		config: c,
+	}, nil
 }
 
-func New(p Config) (BankID, error) {
-	if p.URL == "" {
-		// Set the URL to the default production endpoint if not provided
-		p.URL = BankIDURL
+// Returns a default Test BankID interface with SSL/CA certificates and password
+func NewTestDefault() (BankID, error) {
+	config := Config{
+		URL: BankIDTestUrl,
+		Certificate: Certificate{
+			Passphrase:     BankIDTestPassphrase,
+			SSLCertificate: SSLTestCertificate,
+			CACertificate:  CATestCertificate,
+		},
 	}
 
-	// Set the timeout to 5 seconds if not provided
-	if p.Timeout == 0 {
-		p.Timeout = 5
-	}
-
-	err := p.Validate()
-	if err != nil {
-		return nil, fmt.Errorf("error validating parameters: %w", err)
-	}
-	c, err := newRequestConfig(p)
+	c, err := newRequestConfig(config)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new config: %w", err)
 	}
@@ -127,7 +134,7 @@ func New(p Config) (BankID, error) {
 // Generates the string that needs to be encoded into a QR code.
 // The following pattern is used as a link in the QR code
 //
-//	`bankid.qrStartToken.time.qrAuthCode`
+//		`bankid.qrStartToken.time.qrAuthCode`
 //
 // BankID documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/qrkoder
 func GenerateQrPayload(qrStartSecret string, qrStartToken string, timeInSeconds int) (string, error) {
@@ -150,7 +157,7 @@ func (b *bankid) Auth(ctx context.Context, req AuthRequest) (*AuthResponse, erro
 		return nil, fmt.Errorf("input validation error: %w", err)
 	}
 
-	req, err = process[AuthRequest](
+	req, err = process[AuthRequest](req,
 		processUserVisibleData(req.UserVisibleData),
 		processUserNonVisibleData(req.UserNonVisibleData),
 		processUserVisibleDataFormat(req.UserVisibleDataFormat),
@@ -158,6 +165,7 @@ func (b *bankid) Auth(ctx context.Context, req AuthRequest) (*AuthResponse, erro
 	if err != nil {
 		return nil, fmt.Errorf("process error: %w", err)
 	}
+
 
 	return request[AuthResponse](ctx, RequestParameters{
 		Path:   "/auth",
@@ -177,7 +185,7 @@ func (b *bankid) Sign(ctx context.Context, req SignRequest) (*SignResponse, erro
 		return nil, fmt.Errorf("input validation error: %w", err)
 	}
 
-	req, err = process[SignRequest](
+	req, err = process[SignRequest](req,
 		processUserVisibleData(req.UserVisibleData),
 		processUserNonVisibleData(req.UserNonVisibleData),
 		processUserVisibleDataFormat(req.UserVisibleDataFormat),
@@ -205,7 +213,7 @@ func (b *bankid) PhoneAuth(ctx context.Context, req PhoneAuthRequest) (*PhoneAut
 		return nil, fmt.Errorf("input validation error: %w", err)
 	}
 
-	req, err = process[PhoneAuthRequest](
+	req, err = process[PhoneAuthRequest](req,
 		processUserVisibleData(req.UserVisibleData),
 		processUserNonVisibleData(req.UserNonVisibleData),
 		processUserVisibleDataFormat(req.UserVisibleDataFormat),
@@ -233,7 +241,7 @@ func (b *bankid) PhoneSign(ctx context.Context, req PhoneSignRequest) (*PhoneSig
 		return nil, fmt.Errorf("input validation error: %w", err)
 	}
 
-	req, err = process[PhoneSignRequest](
+	req, err = process[PhoneSignRequest](req,
 		processUserVisibleData(req.UserVisibleData),
 		processUserNonVisibleData(req.UserNonVisibleData),
 		processUserVisibleDataFormat(req.UserVisibleDataFormat),

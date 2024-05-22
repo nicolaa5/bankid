@@ -81,7 +81,7 @@ func validateRequired(body RequestBody) ValidateOption {
 func validateEndUserIP(endUserIP string) ValidateOption {
 	return func() error {
 		if valid := isValidIP(endUserIP); !valid {
-			return InputInvalidError{Message: fmt.Sprint("EndUserIP is not formatted correctly")}
+			return InputInvalidError{Message: fmt.Sprintf("EndUserIP: %s is invalid", endUserIP)}
 		}
 
 		return nil

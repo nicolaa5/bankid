@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -76,34 +75,24 @@ var authCommand = &cobra.Command{
 
 		var b bankid.BankID
 		if test {
-			client, err := bankid.New(bankid.Config{
-				URL: bankid.BankIDTestUrl,
-				Certificate: bankid.Certificate{
-					Passphrase:     bankid.BankIDTestPassphrase,
-					SSLCertificate: bankid.SSLTestCertificate,
-					CACertificate:  bankid.CATestCertificate,
-				},
-			})
+			client, err := bankid.NewTestDefault()
 			if err != nil {
 				log.Fatalf("Internal error in CLI app: %v", err)
 			}
 			b = client
 
 		} else {
-			cert, err := bankid.CertificateFromPaths(
-				bankid.CertificatePaths{
-					Passphrase:         passphrase,
-					SSLCertificatePath: certificatepath,
-					CACertificatePath:  "../certs/ca_prod.crt",
-				},
-			)
+			sslCert, err := bankid.SSLCertificateFromPath(certificatepath)
 			if err != nil {
 				log.Fatalf("Input error: %v", err)
 			}
 
 			client, err := bankid.New(bankid.Config{
 				URL:         bankid.BankIDURL,
-				Certificate: *cert,
+				Certificate: bankid.Certificate{
+					Passphrase: passphrase,
+					SSLCertificate: sslCert,
+				},
 			})
 			if err != nil {
 				log.Fatalf("Internal error in CLI app: %v", err)
@@ -113,8 +102,7 @@ var authCommand = &cobra.Command{
 
 		authResponse, err := b.Auth(cmd.Context(), request)
 		if err != nil {
-			fmt.Printf("Response error: %v\n", err)
-			os.Exit(0)
+			log.Fatalf("Response error: : %v", err)
 		}
 
 		response := make(chan *bankid.CollectResponse)

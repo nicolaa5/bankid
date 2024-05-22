@@ -7,10 +7,8 @@ import (
 
 type ProcessOption func(RequestBody) (RequestBody, error)
 
-// Modify input data based on BankID requirements or leave the input unchanged
-func process[T RequestBody](opts ...ProcessOption) (T, error) {
-	var request T
-
+// Modify input data based on BankID requirements or leave the input unchanged if it's valid or optional
+func process[T RequestBody](request T, opts ...ProcessOption) (T, error) {
 	for _, opt := range opts {
 		val, err := opt(request)
 		switch err.(type) {

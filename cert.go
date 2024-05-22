@@ -26,7 +26,7 @@ type Certificate struct {
 	// Provided by the bank (the trusted CA) that you sign an agreement with, see https://www.bankid.com/en/foretag/kontakt-foeretag
 	SSLCertificate []byte `json:"sslCertificate"`
 
-	// Required: The BankID root certificate
+	// Optional: A CA root certificate. The BankID root certificate will be used by default
 	CACertificate []byte `json:"caCertificate"`
 }
 
@@ -53,34 +53,11 @@ func (c Certificate) Validate() error {
 	return nil
 }
 
-func CertificateFromPaths(params CertificatePaths) (*Certificate, error) {
-	if params.Passphrase == "" {
-		return nil, fmt.Errorf("passphrase is required")
-	}
-
-	if params.SSLCertificatePath == "" {
-		return nil, fmt.Errorf("ssl certificate path is required")
-	}
-
-	if params.CACertificatePath == "" {
-		return nil, fmt.Errorf("ca certificate path is required")
-	}
-
-	cert := &Certificate{}
-	cert.Passphrase = params.Passphrase
-
-	p12, err := os.ReadFile(params.SSLCertificatePath)
+func SSLCertificateFromPath(path string) ([]byte, error) {
+	p12, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("error reading .p12 file: %w", err)
 	}
-
-	cert.SSLCertificate = p12
-
-	ca, err := os.ReadFile(params.CACertificatePath)
-	if err != nil {
-		return nil, fmt.Errorf("error reading root certificate file: %w", err)
-	}
-
-	cert.CACertificate = ca
-	return cert, nil
+	
+	return p12, nil 
 }
