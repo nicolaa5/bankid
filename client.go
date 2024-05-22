@@ -37,9 +37,8 @@ func request[T ResponseBody](ctx context.Context, p RequestParameters) (r *T, er
 		return nil, fmt.Errorf("error marshalling body: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s%s", p.Config.UrlBase, p.Path), bytes.NewBuffer(b))
+	req, err := http.NewRequestWithContext(ctx, "POST", fmt.Sprintf("%s%s", p.Config.UrlBase, p.Path), bytes.NewBuffer(b))
 	if err != nil {
-
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
