@@ -154,7 +154,7 @@ func (b *bankid) Auth(ctx context.Context, req AuthRequest) (*AuthResponse, erro
 		validateRequirement(req.Requirement),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("input validation error: %w", err)
+		return nil, err
 	}
 
 	req, err = process[AuthRequest](req,
@@ -181,7 +181,7 @@ func (b *bankid) Sign(ctx context.Context, req SignRequest) (*SignResponse, erro
 		validateRequirement(req.Requirement),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("input validation error: %w", err)
+		return nil, err
 	}
 
 	req, err = process[SignRequest](req,
@@ -190,7 +190,7 @@ func (b *bankid) Sign(ctx context.Context, req SignRequest) (*SignResponse, erro
 		processUserVisibleDataFormat(req.UserVisibleDataFormat),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("process error: %w", err)
+		return nil, err
 	}
 
 	return request[SignResponse](ctx, RequestParameters{
@@ -209,7 +209,7 @@ func (b *bankid) PhoneAuth(ctx context.Context, req PhoneAuthRequest) (*PhoneAut
 		validateRequirement(req.Requirement),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("input validation error: %w", err)
+		return nil, err
 	}
 
 	req, err = process[PhoneAuthRequest](req,
@@ -237,7 +237,7 @@ func (b *bankid) PhoneSign(ctx context.Context, req PhoneSignRequest) (*PhoneSig
 		validateRequirement(req.Requirement),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("input validation error: %w", err)
+		return nil, err
 	}
 
 	req, err = process[PhoneSignRequest](req,

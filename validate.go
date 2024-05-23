@@ -13,23 +13,10 @@ type ValidateOption func() error
 // Ensure that the requirements that are required are present and in the expected format
 func validate(opts ...ValidateOption) error {
 	for _, opt := range opts {
-		if err := handleOption(opt); err != nil {
+		err := opt()
+		if err != nil {
 			return err
 		}
-	}
-
-	return nil
-}
-
-func handleOption(opt ValidateOption) error {
-	err := opt()
-	switch err.(type) {
-	case nil:
-		return nil
-	case RequiredInputMissingError:
-		return err
-	case InputInvalidError:
-		return err
 	}
 
 	return nil
@@ -160,7 +147,8 @@ func validateRequirement(requirement *Requirement) ValidateOption {
 		}
 
 		for _, opt := range opts {
-			if err := handleOption(opt); err != nil {
+			err := opt()
+			if err != nil {
 				return err
 			}
 		}

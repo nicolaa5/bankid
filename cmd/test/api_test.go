@@ -100,9 +100,9 @@ func TestErrorCodes(t *testing.T) {
 				})
 				require.Error(t, err)
 
-				e, ok := err.(bankid.BankIDError)
+				_, ok := err.(bankid.RequiredInputMissingError)
+				fmt.Printf("type: %T", err)
 				require.True(t, ok)
-				require.Equal(t, e.ErrorCode, bankid.InvalidParameters)
 
 				//using non-existent orderRef
 				uniqueID := uuid.New()
@@ -111,13 +111,13 @@ func TestErrorCodes(t *testing.T) {
 				})
 				require.Error(t, err)
 
-				e, ok = err.(bankid.BankIDError)
+				bankIDErr, ok := err.(bankid.BankIDError)
 				require.True(t, ok)
-				require.Equal(t, e.ErrorCode, bankid.InvalidParameters)
+				require.Equal(t, bankIDErr.ErrorCode, bankid.InvalidParameters)
 
 			case bankid.AlreadyInProgress:
 				ip := randomIPv4()
-				personNummer := randomPersonnummer()
+				personNummer := validPersonnummer()
 
 				//first request
 				_, err := b.Auth(ctx, bankid.AuthRequest{
@@ -176,11 +176,7 @@ func randomNumber(min, max int) int {
 	return rand.Intn(max-min+1) + min
 }
 
-func randomPersonnummer() string {
-	year := randomNumber(1900, 2024)
-	month := randomNumber(1, 12)
-	day := randomNumber(1, 28)
-	serialNumber := randomNumber(1000, 9999)
-
-	return fmt.Sprintf("%04d%02d%02d%04d", year, month, day, serialNumber)
+// from: https://github.com/emilybache/personnummer/blob/master/valid_100.txt
+func validPersonnummer() string {
+	return "193810260632"
 }
