@@ -2,18 +2,16 @@ package main
 
 import (
 	_ "embed"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/nicolaa5/bankid"
-)
-
-var(
-	//go:embed ssl_prod.p12
-	SSLProdCertificate []byte
 )
 
 func main() {
@@ -37,18 +35,24 @@ func main() {
 		log.Fatal("Internal error in new config: %w", err)
 	}
 
-    e.GET("/sse/auth", func(c echo.Context) error {
+    e.POST("/sse/auth", func(c echo.Context) error {
 		ctx := c.Request().Context()
         res := c.Response()
-        res.Header().Set(echo.HeaderContentType, "text/event-stream")
-        res.Header().Set(echo.HeaderCacheControl, "no-cache")
-        res.Header().Set(echo.HeaderConnection, "keep-alive")
-
-		authResponse, err := b.Auth(ctx, bankid.AuthRequest{
-
-		})
+		
+		body, err := io.ReadAll(c.Request().Body)
 		if err != nil {
-			return fmt.Errorf("auth error: %w", err)
+			return fmt.Errorf("read request body error: %w", err)
+		}
+
+		authRequest := bankid.AuthRequest{}
+
+		if err := json.Unmarshal(body, &authRequest); err != nil {
+			return c.String(http.StatusBadRequest, fmt.Sprintf("Invalid input error: %s", string(body)))
+		}
+
+		authResponse, err := b.Auth(ctx, authRequest)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("Auth error: %v", err.Error()))
 		}
 
 		response := make(chan *bankid.CollectResponse)
@@ -59,6 +63,10 @@ func main() {
 			response,
 		)
 
+        res.Header().Set(echo.HeaderContentType, "text/event-stream")
+        res.Header().Set(echo.HeaderCacheControl, "no-cache")
+        res.Header().Set(echo.HeaderConnection, "keep-alive")
+
 		for {
 			select {
 			case <-ctx.Done():
@@ -68,8 +76,13 @@ func main() {
 				if !ok {
 					continue
 				}
+
+				bytes, err := json.Marshal(collectResponse)
+				if err != nil {
+					c.String(http.StatusInternalServerError, fmt.Sprintf("Data marshal error: %v", err.Error()))
+				}
 	
-				fmt.Fprintf(res, "data: %#v\n\n", collectResponse)
+				fmt.Fprintf(res, "data: %s\n\n",  string(bytes))
 				res.Flush()
 			}
 		}
@@ -77,7 +90,3 @@ func main() {
 
     e.Logger.Fatal(e.Start(":8080"))
 }
-
-// func collect(b bankid.BankID, c echo.Context, res *echo.Response, orderRef string) error {
-
-// }
