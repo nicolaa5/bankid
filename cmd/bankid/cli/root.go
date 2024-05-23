@@ -18,9 +18,20 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 
+		if !test {
+			envPrompt := &survey.Select{
+				Message: "Please choose the BankID environment to use:",
+				Options: []string{
+					"test",
+					"production",
+				},
+			}
+			survey.AskOne(envPrompt, &test, survey.WithValidator(survey.Required))
+		}
+
 		// Define survey questions
 		var endpoint string
-		prompt := &survey.Select{
+		endpointPrompt := &survey.Select{
 			Message: "Please choose the BankID endpoint to call:",
 			Options: []string{
 				"/auth",
@@ -29,7 +40,7 @@ var rootCmd = &cobra.Command{
 				"/phone/sign",
 			},
 		}
-		survey.AskOne(prompt, &endpoint, survey.WithValidator(survey.Required))
+		survey.AskOne(endpointPrompt, &endpoint, survey.WithValidator(survey.Required))
 
 		switch endpoint {
 		case "/auth":
@@ -48,6 +59,7 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
+	rootCmd.PersistentFlags().BoolVarP(&test, "test", "t", false, "Whether to use the BankID Test environment for the request")
 	err := rootCmd.Execute()
 	if err != nil {
 		fmt.Println(err)
