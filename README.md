@@ -12,6 +12,12 @@ To install the CLI app with which to interact with the package
 go install github.com/nicolaa5/bankid/cmd/bankid
 ```
 
+Or install with docker
+```bash
+docker pull ghcr.io/nicolaa5/bankid/cli:latest
+```
+
+
 ### Who is this repository for? 
 You can use this repo if you're using BankID in your organization for one of the following purposes: 
 - Authenticating users to use your services
