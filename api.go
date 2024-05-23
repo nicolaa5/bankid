@@ -27,7 +27,7 @@ type BankID interface {
 	// 	- qrStartSecret
 	//
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/auth
-	// 
+	//
 	// Request flow:
 	// 	- Starting the request: `hintCode: outstandingTransaction`
 	// 	- User needs to provide the pin to authenticate themselves: `hintCode: userSign`
@@ -42,7 +42,7 @@ type BankID interface {
 	// 	- qrStartSecret
 	//
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/sign
-	// 
+	//
 	// Request flow:
 	// 	- Starting the request: `hintCode: outstandingTransaction`
 	// 	- User needs to provide the pin to sign the document: `hintCode: userSign`
@@ -53,7 +53,7 @@ type BankID interface {
 	// Use the collect method to query the status of the order.
 	//
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-auth
-	// 
+	//
 	// Request flow:
 	// 	- Starting the request: `hintCode: outstandingTransaction`
 	// 	- User needs to confirm that they called, or were called by RP: `hintCode: userCallConfirm`
@@ -65,7 +65,7 @@ type BankID interface {
 	// Use the collect method to query the status of the order.
 	//
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-sign
-	// 
+	//
 	// Request flow:
 	// 	- Starting the request: `hintCode: outstandingTransaction`
 	// 	- User needs to confirm that they called, or were called by RP: `hintCode: userCallConfirm`

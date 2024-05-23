@@ -18,9 +18,9 @@ var signConfig = bankid.Config{
 }
 
 var signCommand = &cobra.Command{
-	Use:     "sign",
-	Short:   "Sign an agreement using BankID",
-	Long:    `Use the /sign endpoint to sign a document or agreement with BankID and get a QR code to scan.`,
+	Use:   "sign",
+	Short: "Sign an agreement using BankID",
+	Long:  `Use the /sign endpoint to sign a document or agreement with BankID and get a QR code to scan.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := cmd.Context()

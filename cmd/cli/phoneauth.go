@@ -18,9 +18,9 @@ var phoneAuthConfig = bankid.Config{
 }
 
 var phoneAuthCommand = &cobra.Command{
-	Use:     "phoneauth",
-	Short:   "Authenticate a user over a phone call with BankID",
-	Long:    `Use the /phone/auth endpoint to authenticate a user with BankID from the provided Personnummer`,
+	Use:   "phoneauth",
+	Short: "Authenticate a user over a phone call with BankID",
+	Long:  `Use the /phone/auth endpoint to authenticate a user with BankID from the provided Personnummer`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := cmd.Context()
@@ -58,7 +58,7 @@ var phoneAuthCommand = &cobra.Command{
 		}
 
 		var b bankid.BankID
-		var err error 
+		var err error
 
 		if test {
 			b, err = bankid.NewTestDefault()
@@ -89,7 +89,7 @@ var phoneAuthCommand = &cobra.Command{
 			select {
 			case <-ctx.Done():
 				return
-	
+
 			case collectResponse, ok := <-response:
 				if !ok {
 					continue
@@ -97,7 +97,7 @@ var phoneAuthCommand = &cobra.Command{
 
 				prettyPrint(collectResponse)
 			default:
-	
+
 			}
 		}
 	},

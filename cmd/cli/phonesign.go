@@ -18,9 +18,9 @@ var phoneSignConfig = bankid.Config{
 }
 
 var phoneSignCommand = &cobra.Command{
-	Use:     "phonesign",
-	Short:   "Sign an agreement over a phone call using BankID",
-	Long:    `Use the /phone/sign endpoint to sign a document with BankID from the provided Personnummer`,
+	Use:   "phonesign",
+	Short: "Sign an agreement over a phone call using BankID",
+	Long:  `Use the /phone/sign endpoint to sign a document with BankID from the provided Personnummer`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := cmd.Context()
@@ -66,7 +66,7 @@ var phoneSignCommand = &cobra.Command{
 		}
 
 		var b bankid.BankID
-		var err error 
+		var err error
 
 		if test {
 			b, err = bankid.NewTestDefault()
@@ -97,7 +97,7 @@ var phoneSignCommand = &cobra.Command{
 			select {
 			case <-ctx.Done():
 				return
-	
+
 			case collectResponse, ok := <-response:
 				if !ok {
 					continue
@@ -105,7 +105,7 @@ var phoneSignCommand = &cobra.Command{
 
 				prettyPrint(collectResponse)
 			default:
-	
+
 			}
 		}
 	},

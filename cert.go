@@ -41,7 +41,7 @@ func (c Certificate) Validate() error {
 		return fmt.Errorf("ssl certificate and path are not provided")
 	}
 
-	if c.Passphrase == ""{
+	if c.Passphrase == "" {
 		return fmt.Errorf("passphrase for ssl certificate is not provided")
 	}
 

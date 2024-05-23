@@ -51,7 +51,7 @@ var authCommand = &cobra.Command{
 		}
 
 		var b bankid.BankID
-		var err error 
+		var err error
 
 		if test {
 			b, err = bankid.NewTestDefault()
