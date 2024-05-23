@@ -1,2 +1,3 @@
 .vscode
-certs/*prod.p12
+**.p12
+**.env
