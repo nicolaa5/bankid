@@ -7,6 +7,11 @@
 
 ## Relying Party (RP) service
 
+To install the CLI app with which to interact with the package
+```bash
+go install github.com/nicolaa5/bankid/cmd/bankid
+```
+
 ### Who is this repository for? 
 You can use this repo if you're using BankID in your organization for one of the following purposes: 
 - Authenticating users to use your services
