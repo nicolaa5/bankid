@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/nicolaa5/bankid/cmd/cli/src"
+	"github.com/nicolaa5/bankid/cmd/bankid/cli"
 )
 
 func main() {
