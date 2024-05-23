@@ -74,6 +74,22 @@ func request[T ResponseBody](ctx context.Context, p RequestParameters) (r *T, er
 }
 
 func newRequestConfig(params Config) (*RequestConfig, error) {
+	if params.SSLCertificate == nil {
+		sslCert, err := CertificateFromPath(params.SSLCertificatePath)
+		if err != nil {
+			return nil, fmt.Errorf("error getting ssl certificate from path: %w", err)
+		}
+		params.SSLCertificate = sslCert
+	}
+
+	if params.CACertificate == nil {
+		caCert, err := CertificateFromPath(params.CACertificatePath)
+		if err != nil {
+			return nil, fmt.Errorf("error getting ca certificate from path: %w", err)
+		}
+		params.CACertificate = caCert
+	}
+
 	// Decode the .p12 certificate into a private key and the certificate
 	key, cert, err := pkcs12.Decode(params.SSLCertificate, params.Passphrase)
 	if err != nil {

@@ -1,12 +1,15 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 )
+
+var test bool
 
 var rootCmd = &cobra.Command{
 	Use:   "bankid",
@@ -42,4 +45,13 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func prettyPrint(data interface{}) {
+	bytes, err := json.MarshalIndent(data, "", "\t")
+	if err != nil {
+		fmt.Printf(fmt.Sprintf("\n%#v\n", data))
+		return
+	}
+	fmt.Printf(fmt.Sprintf("\n%v\n", string(bytes)))
 }

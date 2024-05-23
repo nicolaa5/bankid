@@ -14,7 +14,7 @@ type Config struct {
 }
 
 // Ensures input data is set based on BankID requirements or leaves the input unchanged if it's valid or optional
-func (c *Config) EnsureRequired() {
+func (c *Config) UseDefault() {
 	if c.URL == "" {
 		// Set the URL to the default production endpoint if not provided
 		c.URL = BankIDURL

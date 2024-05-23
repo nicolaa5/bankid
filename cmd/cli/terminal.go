@@ -1,13 +1,47 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/mdp/qrterminal"
 	"github.com/nicolaa5/bankid"
 	"golang.org/x/term"
 )
+
+// Animate the QR code in
+func animateTerminalQR(ctx context.Context, qrStartSecret, qrStartToken string, response chan *bankid.CollectResponse) {
+	start := time.Now().Unix()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+
+		case collectResponse, ok := <-response:
+			if !ok {
+				continue
+			}
+
+			now := time.Now().Unix()
+			diff := int(now - start)
+
+			displayTerminalQR(qrStartSecret, qrStartToken, diff)
+
+			if collectResponse.Status == bankid.Complete {
+				fmt.Println("Authentication successful")
+				prettyPrint(collectResponse)
+			} else if collectResponse.Status == bankid.Failed {
+				fmt.Printf("\nAuthentication failed, reason: %s\n", collectResponse.HintCode)
+				prettyPrint(collectResponse)
+			}
+		default:
+
+		}
+	}
+}
 
 // Display a QR code in the terminal, generated from QR secret and token received in the /auth and /sign endpoints
 func displayTerminalQR(qrStartSecret, qrStartToken string, timeDifference int) {

@@ -12,7 +12,7 @@ import (
 )
 
 func TestCertPaths(t *testing.T) {
-	_, err := bankid.SSLCertificateFromPath("../../certs/FPTestcert4_20230629.p12")
+	_, err := bankid.CertificateFromPath("../../certs/FPTestcert4_20230629.p12")
 	require.NoError(t, err)
 }
 

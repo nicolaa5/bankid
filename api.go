@@ -93,12 +93,12 @@ type bankid struct {
 }
 
 func New(config Config) (BankID, error) {
-	config.EnsureRequired()
-
 	err := config.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("error validating input config: %w", err)
 	}
+
+	config.UseDefault()
 
 	c, err := newRequestConfig(config)
 	if err != nil {
