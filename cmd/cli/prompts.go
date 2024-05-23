@@ -41,3 +41,20 @@ func userDataVisibleDataPrompt() *survey.Input {
 		Help:    "The visible data helps the enduser understand what they are signing",
 	}
 }
+
+func personalNumberPrompt() *survey.Input {
+	return &survey.Input{
+		Message: "Provide the enduser's Personnummer",
+		Help:    "The Personnummer (Personal Number) is a unique id in Sweden required for authentication in most digital services including BankID",
+	}
+}
+
+func callInitiatorPrompt() *survey.Input {
+	return &survey.Input{
+		Message: "Confirm if the enduser (user) or your service (RP) initiated the phone call",
+		Suggest: func(toComplete string) []string {
+			return []string{"user", "RP"}
+		},
+	}
+}
+

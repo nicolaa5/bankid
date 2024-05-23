@@ -101,5 +101,5 @@ func init() {
 	signCommand.PersistentFlags().StringArrayP("certificatepolicies", "s", signRequest.Requirement.CertificatePolicies, "The oid in certificate policies in the user certificate")
 	signCommand.PersistentFlags().BoolVarP(&signRequest.Requirement.MRTD, "requiremrtd", "m", false, "Users are required to have a NFC-enabled smartphone which can read MRTD (Machine readable travel document) information to complete the order")
 	signCommand.PersistentFlags().BoolVarP(&signRequest.Requirement.Pincode, "requirepincode", "o", false, "Users are required to sign the transaction with their PIN code, even if they have biometrics activated.")
-	signCommand.PersistentFlags().StringVarP(&signRequest.Requirement.PersonalNumber, "personalnumber", "n", "", " A personal identification number to be used to complete the transaction")
+	signCommand.PersistentFlags().StringVarP(&signRequest.Requirement.PersonalNumber, "requiredpersonalnumber", "u", "", " A personal identification number that is required to complete the transaction")
 }

@@ -25,6 +25,8 @@ var rootCmd = &cobra.Command{
 			Options: []string{
 				"/auth",
 				"/sign",
+				"/phone/auth",
+				"/phone/sign",
 			},
 		}
 		survey.AskOne(prompt, &endpoint, survey.WithValidator(survey.Required))
@@ -32,6 +34,12 @@ var rootCmd = &cobra.Command{
 		switch endpoint {
 		case "/auth":
 			authCommand.Run(cmd, args)
+		case "/sign":
+			signCommand.Run(cmd, args)
+		case "/phone/auth":
+			phoneAuthCommand.Run(cmd, args)
+		case "/phone/sign":
+			phoneSignCommand.Run(cmd, args)
 		}
 
 		// Process user input
