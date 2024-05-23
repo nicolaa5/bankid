@@ -27,6 +27,11 @@ type BankID interface {
 	// 	- qrStartSecret
 	//
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/auth
+	//
+	// Request flow:
+	// 	- Starting the request: `hintCode: outstandingTransaction`
+	// 	- User needs to provide the pin to authenticate themselves: `hintCode: userSign`
+	// 	- User has authenticated themselves successfully: `status: complete`
 	Auth(ctx context.Context, request AuthRequest) (*AuthResponse, error)
 
 	// 🖋️ Initiates an signing order.
@@ -37,18 +42,35 @@ type BankID interface {
 	// 	- qrStartSecret
 	//
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/sign
+	//
+	// Request flow:
+	// 	- Starting the request: `hintCode: outstandingTransaction`
+	// 	- User needs to provide the pin to sign the document: `hintCode: userSign`
+	// 	- User has signed the document successfully: `status: complete`
 	Sign(ctx context.Context, request SignRequest) (*SignResponse, error)
 
 	// 🗝️ Initiates an authentication order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
 	//
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-auth
+	//
+	// Request flow:
+	// 	- Starting the request: `hintCode: outstandingTransaction`
+	// 	- User needs to confirm that they called, or were called by RP: `hintCode: userCallConfirm`
+	// 	- User needs to provide the pin to authenticate themselves: `hintCode: userSign`
+	// 	- User has authenticated themselves successfully: `status: complete`
 	PhoneAuth(ctx context.Context, request PhoneAuthRequest) (*PhoneAuthResponse, error)
 
 	// 🖋️ Initiates an signing order when the user is talking to the RP over the phone.
 	// Use the collect method to query the status of the order.
 	//
 	// Documentation: https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/graenssnittsbeskrivning/phone-sign
+	//
+	// Request flow:
+	// 	- Starting the request: `hintCode: outstandingTransaction`
+	// 	- User needs to confirm that they called, or were called by RP: `hintCode: userCallConfirm`
+	// 	- User needs to provide the pin to sign the document: `hintCode: userSign`
+	// 	- User has signed the document successfully: `status: complete`
 	PhoneSign(ctx context.Context, request PhoneSignRequest) (*PhoneSignResponse, error)
 
 	// 🫳 Collects the result of a sign or auth order using orderRef as reference.
@@ -93,12 +115,12 @@ type bankid struct {
 }
 
 func New(config Config) (BankID, error) {
-	config.EnsureRequired()
-
 	err := config.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("error validating input config: %w", err)
 	}
+
+	config.UseDefault()
 
 	c, err := newRequestConfig(config)
 	if err != nil {
