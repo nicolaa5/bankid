@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"testing"
@@ -11,16 +12,14 @@ import (
 )
 
 func TestCertPaths(t *testing.T) {
-	_, err := bankid.CertificateFromPaths(bankid.CertificatePaths{
-		Passphrase:         bankid.BankIDTestPassphrase,
-		SSLCertificatePath: "../../certs/ssl_test.p12",
-		CACertificatePath:  "../../certs/ca_test.crt",
-	})
+	_, err := bankid.SSLCertificateFromPath("../../certs/FPTestcert4_20230629.p12")
 	require.NoError(t, err)
 }
 
 func TestAuthenticate(t *testing.T) {
-	b, err := bankid.New(bankid.Parameters{
+	ctx := context.Background()
+
+	b, err := bankid.New(bankid.Config{
 		URL: bankid.BankIDTestUrl,
 		Certificate: bankid.Certificate{
 			Passphrase:     bankid.BankIDTestPassphrase,
@@ -40,7 +39,7 @@ func TestAuthenticate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			authResponse, err := b.Auth(bankid.AuthRequest{
+			authResponse, err := b.Auth(ctx, bankid.AuthRequest{
 				EndUserIP: randomIPv4(),
 			})
 
@@ -50,7 +49,7 @@ func TestAuthenticate(t *testing.T) {
 			require.NotEmpty(t, authResponse.QrStartSecret)
 			require.NotEmpty(t, authResponse.QrStartToken)
 
-			collectResponse, err := b.Collect(bankid.CollectRequest{
+			collectResponse, err := b.Collect(ctx, bankid.CollectRequest{
 				OrderRef: authResponse.OrderRef,
 			})
 
@@ -59,7 +58,7 @@ func TestAuthenticate(t *testing.T) {
 			require.Equal(t, collectResponse.Status, bankid.Pending)
 			require.Equal(t, collectResponse.HintCode, bankid.OutstandingTransaction)
 
-			_, err = b.Cancel(bankid.CancelRequest{
+			_, err = b.Cancel(ctx, bankid.CancelRequest{
 				OrderRef: authResponse.OrderRef,
 			})
 
@@ -69,7 +68,9 @@ func TestAuthenticate(t *testing.T) {
 }
 
 func TestErrorCodes(t *testing.T) {
-	b, err := bankid.New(bankid.Parameters{
+	ctx := context.Background()
+
+	b, err := bankid.New(bankid.Config{
 		URL: bankid.BankIDTestUrl,
 		Certificate: bankid.Certificate{
 			Passphrase:     bankid.BankIDTestPassphrase,
@@ -94,43 +95,43 @@ func TestErrorCodes(t *testing.T) {
 			switch test.expected.ErrorCode {
 			case bankid.InvalidParameters:
 				//empty invalid IP as EndUserIP
-				_, err := b.Auth(bankid.AuthRequest{
+				_, err := b.Auth(ctx, bankid.AuthRequest{
 					EndUserIP: "",
 				})
 				require.Error(t, err)
 
-				e, ok := err.(bankid.BankIDError)
+				_, ok := err.(bankid.RequiredInputMissingError)
+				fmt.Printf("type: %T", err)
 				require.True(t, ok)
-				require.Equal(t, e.ErrorCode, bankid.InvalidParameters)
 
 				//using non-existent orderRef
 				uniqueID := uuid.New()
-				_, err = b.Collect(bankid.CollectRequest{
+				_, err = b.Collect(ctx, bankid.CollectRequest{
 					OrderRef: uniqueID.String(),
 				})
 				require.Error(t, err)
 
-				e, ok = err.(bankid.BankIDError)
+				bankIDErr, ok := err.(bankid.BankIDError)
 				require.True(t, ok)
-				require.Equal(t, e.ErrorCode, bankid.InvalidParameters)
+				require.Equal(t, bankIDErr.ErrorCode, bankid.InvalidParameters)
 
 			case bankid.AlreadyInProgress:
 				ip := randomIPv4()
-				personNummer := randomPersonnummer()
+				personNummer := validPersonnummer()
 
 				//first request
-				_, err := b.Auth(bankid.AuthRequest{
+				_, err := b.Auth(ctx, bankid.AuthRequest{
 					EndUserIP: ip,
-					Requirement: bankid.Requirement{
+					Requirement: &bankid.Requirement{
 						PersonalNumber: personNummer,
 					},
 				})
 				require.NoError(t, err)
 
 				//second request with the same personNummer
-				_, err = b.Auth(bankid.AuthRequest{
+				_, err = b.Auth(ctx, bankid.AuthRequest{
 					EndUserIP: ip,
-					Requirement: bankid.Requirement{
+					Requirement: &bankid.Requirement{
 						PersonalNumber: personNummer,
 					},
 				})
@@ -142,7 +143,7 @@ func TestErrorCodes(t *testing.T) {
 				require.Equal(t, e.ErrorCode, bankid.AlreadyInProgress)
 
 			case bankid.NotFound:
-				b, err := bankid.New(bankid.Parameters{
+				b, err := bankid.New(bankid.Config{
 					// add non-existent path to URL
 					URL: "https://appapi2.test.bankid.com/rp/v6.0/forbidden/path",
 					Certificate: bankid.Certificate{
@@ -153,7 +154,7 @@ func TestErrorCodes(t *testing.T) {
 				})
 				require.NoError(t, err)
 
-				_, err = b.Auth(bankid.AuthRequest{
+				_, err = b.Auth(ctx, bankid.AuthRequest{
 					EndUserIP: randomIPv4(),
 				})
 				require.Error(t, err)
@@ -175,11 +176,7 @@ func randomNumber(min, max int) int {
 	return rand.Intn(max-min+1) + min
 }
 
-func randomPersonnummer() string {
-	year := randomNumber(1900, 2024)
-	month := randomNumber(1, 12)
-	day := randomNumber(1, 28)
-	serialNumber := randomNumber(1000, 9999)
-
-	return fmt.Sprintf("%04d%02d%02d%04d", year, month, day, serialNumber)
+// from: https://github.com/emilybache/personnummer/blob/master/valid_100.txt
+func validPersonnummer() string {
+	return "193810260632"
 }

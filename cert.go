@@ -13,11 +13,11 @@ var (
 	//go:embed certs/ca_test.crt
 	CATestCertificate []byte
 
-	//go:embed certs/ssl_test.p12
+	//go:embed certs/FPTestcert4_20230629.p12
 	SSLTestCertificate []byte
 )
 
-// This certificate is used to authenticate the client to the BankID API.
+// This certificate is used to authenticate the RP service to the BankID API.
 type Certificate struct {
 	// Required: The password for your SSLCertificate
 	Passphrase string `json:"passphrase"`
@@ -26,7 +26,7 @@ type Certificate struct {
 	// Provided by the bank (the trusted CA) that you sign an agreement with, see https://www.bankid.com/en/foretag/kontakt-foeretag
 	SSLCertificate []byte `json:"sslCertificate"`
 
-	// Required: The BankID root certificate
+	// Optional: A CA root certificate. The BankID root certificate will be used by default
 	CACertificate []byte `json:"caCertificate"`
 }
 
@@ -41,34 +41,23 @@ type CertificatePaths struct {
 	CACertificatePath string `json:"caCertificatePath"`
 }
 
-func CertificateFromPaths(params CertificatePaths) (*Certificate, error) {
-	if params.Passphrase == "" {
-		return nil, fmt.Errorf("passphrase is required")
+func (c Certificate) Validate() error {
+	if c.SSLCertificate == nil {
+		return fmt.Errorf("ssl certificate is not provided")
 	}
 
-	if params.SSLCertificatePath == "" {
-		return nil, fmt.Errorf("ssl certificate path is required")
+	if c.CACertificate == nil {
+		return fmt.Errorf("ca root certificate is not provided")
 	}
 
-	if params.CACertificatePath == "" {
-		return nil, fmt.Errorf("ca certificate path is required")
-	}
+	return nil
+}
 
-	cert := &Certificate{}
-	cert.Passphrase = params.Passphrase
-
-	p12, err := os.ReadFile(params.SSLCertificatePath)
+func SSLCertificateFromPath(path string) ([]byte, error) {
+	p12, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("error reading .p12 file: %w", err)
 	}
 
-	cert.SSLCertificate = p12
-
-	ca, err := os.ReadFile(params.CACertificatePath)
-	if err != nil {
-		return nil, fmt.Errorf("error reading root certificate file: %w", err)
-	}
-
-	cert.CACertificate = ca
-	return cert, nil
+	return p12, nil
 }

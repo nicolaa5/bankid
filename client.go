@@ -2,6 +2,7 @@ package bankid
 
 import (
 	"bytes"
+	"context"
 	"crypto"
 	"crypto/tls"
 	"crypto/x509"
@@ -30,15 +31,14 @@ type RequestParameters struct {
 }
 
 // request sends a request to the BankID API and handles and returns the response or error.
-func request[T ResponseBody](p RequestParameters) (r *T, err error) {
+func request[T ResponseBody](ctx context.Context, p RequestParameters) (r *T, err error) {
 	b, err := p.Body.Marshal()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling body: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s%s", p.Config.UrlBase, p.Path), bytes.NewBuffer(b))
+	req, err := http.NewRequestWithContext(ctx, "POST", fmt.Sprintf("%s%s", p.Config.UrlBase, p.Path), bytes.NewBuffer(b))
 	if err != nil {
-
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
@@ -73,7 +73,7 @@ func request[T ResponseBody](p RequestParameters) (r *T, err error) {
 	return r, nil
 }
 
-func newRequestConfig(params Parameters) (*RequestConfig, error) {
+func newRequestConfig(params Config) (*RequestConfig, error) {
 	// Decode the .p12 certificate into a private key and the certificate
 	key, cert, err := pkcs12.Decode(params.SSLCertificate, params.Passphrase)
 	if err != nil {

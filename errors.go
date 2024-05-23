@@ -4,6 +4,24 @@ import (
 	"fmt"
 )
 
+// RequiredInputMissingError is an error returned when a required input is missing.
+type RequiredInputMissingError struct {
+	Message string
+}
+
+// InputInvalidError is an error returned when a user provided input is invalid.
+type InputInvalidError struct {
+	Message string
+}
+
+func (r RequiredInputMissingError) Error() string {
+	return fmt.Sprintf("required input is missing: %s", r.Message)
+}
+
+func (r InputInvalidError) Error() string {
+	return fmt.Sprintf("invalid input: %s", r.Message)
+}
+
 // BankIDError is an error returned by BankID that should be communicated to the enduser, or handled by the RP.
 type BankIDError struct {
 	StatusCode int       `json:"statusCode,omitempty"`

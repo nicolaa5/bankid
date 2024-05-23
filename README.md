@@ -2,13 +2,16 @@
     <img width=300 src="./bankid-go.png"/>
 </div>
 
-## 🇸🇪 BankID - API Client
+# 🇸🇪 BankID
+## Relying Party (RP) service
 ![ Unit Tests](https://github.com/nicolaa5/bankid/actions/workflows/unit.tests.yml/badge.svg)  
 
 ### Who is this repository for? 
 You can use this repo if you're using BankID in your organization for one of the following purposes: 
 - Authenticating users to use your services
 - Signing documents, transactions or payments related to your organization
+
+<img width=800 src="./authflow.jpg"/>
 
 ### Setup
 For setup instructions from BankID visit [their integration guide](https://www.bankid.com/en/utvecklare/guider/teknisk-integrationsguide/rp-introduktion)

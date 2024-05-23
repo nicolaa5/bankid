@@ -1,6 +1,8 @@
 package bankid
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // RequestBody is an interface for all BankID requests.
 type RequestBody interface {
@@ -17,7 +19,7 @@ type AuthRequest struct {
 	EndUserIP string `json:"endUserIp"`
 
 	// Optional: Requirements on how the auth order must be performed.
-	Requirement Requirement `json:"requirement,omitempty"`
+	Requirement *Requirement `json:"requirement,omitempty"`
 
 	// Optional: Text displayed to the user during authentication with BankID, with the purpose of providing context for the authentication
 	// and to enable users to detect identification errors and averting fraud attempts.
@@ -48,7 +50,7 @@ type SignRequest struct {
 	UserVisibleData string `json:"userVisibleData"`
 
 	// Optional: Requirements on how the auth order must be performed. See section Requirements below for more details.
-	Requirement Requirement `json:"requirement,omitempty"`
+	Requirement *Requirement `json:"requirement,omitempty"`
 
 	// Optional: Data is not displayed to the user. String. The value must be base 64-encoded. 1-1 500 characters after base 64-encoding.
 	UserNonVisibleData string `json:"userNonVisibleData,omitempty"`
@@ -75,7 +77,7 @@ type PhoneAuthRequest struct {
 	CallInitiator string `json:"callInitiator"`
 
 	// Optional: Requirements on how the auth order must be performed.
-	Requirement Requirement `json:"requirement,omitempty"`
+	Requirement *Requirement `json:"requirement,omitempty"`
 
 	// Optional: Text displayed to the user during authentication with BankID, with the purpose of providing context for the authentication
 	// and to enable users to detect identification errors and averting fraud attempts.
@@ -96,10 +98,8 @@ func (r PhoneAuthRequest) Marshal() ([]byte, error) {
 }
 
 type PhoneSignRequest struct {
-	// Required: The user IP address as seen by RP. String. IPv4 and IPv6 is allowed.
-	// Correct IP address must be the IP address representing the user agent (the end user device) as seen by the RP. In case of inbound proxy, special considerations may need to be taken into account to get the correct address.
-	// In some use cases the IP address is not available, for instance in voice-based services. In these cases, the internal representation of those systems’ IP address may be used.
-	EndUserIP string `json:"endUserIp"`
+	// Required: The personal number of the user. String. 12 digits.
+	PersonalNumber string `json:"personalNumber"`
 
 	// Required: Indicate if the user or the RP initiated the phone call.
 	// 	- user: user called the RP
@@ -107,7 +107,7 @@ type PhoneSignRequest struct {
 	CallInitiator string `json:"callInitiator"`
 
 	// Optional: Requirements on how the auth order must be performed. See section Requirements below for more details.
-	Requirement Requirement `json:"requirement,omitempty"`
+	Requirement *Requirement `json:"requirement,omitempty"`
 
 	// Required: Text to be displayed to the user. String. The text can be formatted using CR, LF and CRLF for new lines.
 	// The text must be encoded as UTF-8 and then base 64 encoded. 1 – 40,000 characters after base 64 encoding.
