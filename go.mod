@@ -5,6 +5,8 @@ go 1.21.0
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/google/uuid v1.6.0
+	github.com/joho/godotenv v1.5.1
+	github.com/labstack/echo/v4 v4.12.0
 	github.com/mdp/qrterminal v1.0.1
 	github.com/personnummer/go/v3 v3.1.2
 	github.com/spf13/cobra v1.8.0
@@ -15,9 +17,7 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
-	github.com/labstack/echo/v4 v4.12.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
