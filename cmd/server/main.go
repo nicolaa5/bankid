@@ -15,19 +15,19 @@ import (
 )
 
 func main() {
-    e := echo.New()
+	e := echo.New()
 
-    err := godotenv.Load(".env")
-    if err != nil {
-        log.Fatalf("Error loading .env file: %v", err)
-    }
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
 
-    passphrase := os.Getenv("SSL_CERT_PASSPHRASE")
-    sslCertPath := os.Getenv("SSL_CERT_PATH")
+	passphrase := os.Getenv("SSL_CERT_PASSPHRASE")
+	sslCertPath := os.Getenv("SSL_CERT_PATH")
 
 	b, err := bankid.New(bankid.Config{
 		Certificate: bankid.Certificate{
-			Passphrase: passphrase,
+			Passphrase:         passphrase,
 			SSLCertificatePath: sslCertPath,
 		},
 	})
@@ -35,10 +35,10 @@ func main() {
 		log.Fatal("Internal error in new config: %w", err)
 	}
 
-    e.POST("/sse/auth", func(c echo.Context) error {
+	e.POST("/sse/auth", func(c echo.Context) error {
 		ctx := c.Request().Context()
-        res := c.Response()
-		
+		res := c.Response()
+
 		body, err := io.ReadAll(c.Request().Body)
 		if err != nil {
 			return fmt.Errorf("read request body error: %w", err)
@@ -58,20 +58,20 @@ func main() {
 		response := make(chan *bankid.CollectResponse)
 
 		go b.CollectRoutine(
-			ctx, 
-			bankid.CollectRequest{OrderRef: authResponse.OrderRef}, 
+			ctx,
+			bankid.CollectRequest{OrderRef: authResponse.OrderRef},
 			response,
 		)
 
-        res.Header().Set(echo.HeaderContentType, "text/event-stream")
-        res.Header().Set(echo.HeaderCacheControl, "no-cache")
-        res.Header().Set(echo.HeaderConnection, "keep-alive")
+		res.Header().Set(echo.HeaderContentType, "text/event-stream")
+		res.Header().Set(echo.HeaderCacheControl, "no-cache")
+		res.Header().Set(echo.HeaderConnection, "keep-alive")
 
 		for {
 			select {
 			case <-ctx.Done():
 				return nil
-	
+
 			case collectResponse, ok := <-response:
 				if !ok {
 					continue
@@ -81,12 +81,12 @@ func main() {
 				if err != nil {
 					c.String(http.StatusInternalServerError, fmt.Sprintf("Data marshal error: %v", err.Error()))
 				}
-	
-				fmt.Fprintf(res, "data: %s\n\n",  string(bytes))
+
+				fmt.Fprintf(res, "data: %s\n\n", string(bytes))
 				res.Flush()
 			}
 		}
-    })
+	})
 
-    e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8080"))
 }
