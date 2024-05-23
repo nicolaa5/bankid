@@ -27,5 +27,5 @@ jobs:
       env:
         TAG: latest
       run: |
-            docker tag bankid docker.pkg.github.com/nicolaa5/bankid:TAG
-            docker push docker.pkg.github.com/nicolaa5/bankid:TAG
+            docker tag bankid docker.pkg.github.com/nicolaa5/bankid/cli:TAG
+            docker push docker.pkg.github.com/nicolaa5/bankid/cli:TAG
