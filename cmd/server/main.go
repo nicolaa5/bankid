@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -67,6 +68,8 @@ func main() {
 		res.Header().Set(echo.HeaderCacheControl, "no-cache")
 		res.Header().Set(echo.HeaderConnection, "keep-alive")
 
+		start := time.Now().Unix()
+
 		for {
 			select {
 			case <-ctx.Done():
@@ -77,12 +80,22 @@ func main() {
 					continue
 				}
 
+				now := time.Now().Unix()
+				diff := int(now - start)
+
 				bytes, err := json.Marshal(collectResponse)
 				if err != nil {
 					c.String(http.StatusInternalServerError, fmt.Sprintf("Data marshal error: %v", err.Error()))
 				}
 
 				fmt.Fprintf(res, "data: %s\n\n", string(bytes))
+
+				payload, err := bankid.GenerateQrPayload(authResponse.QrStartSecret, authResponse.QrStartToken, diff)
+				if err != nil {
+					c.String(http.StatusInternalServerError, fmt.Sprintf("Generating QR payload error: %v", err.Error()))
+				}
+
+				fmt.Fprintf(res, "data: %s\n\n", string(payload))
 				res.Flush()
 			}
 		}
