@@ -74,7 +74,7 @@ var signCommand = &cobra.Command{
 			log.Fatalf("Sign response error: : %v", err)
 		}
 
-		fmt.Printf("\n\nWaiting for user to sign using BankID...\n\n")
+		fmt.Printf("\n\nWaiting for user to sign a document using BankID...\n\n")
 
 		req := bankid.CollectRequest{
 			OrderRef: signResponse.OrderRef,

@@ -82,7 +82,7 @@ var phoneSignCommand = &cobra.Command{
 			log.Fatalf("PhoneSign response error: : %v", err)
 		}
 
-		fmt.Printf("\n\nWaiting for user to phoneSignenticate using BankID...\n\n")
+		fmt.Printf("\n\nWaiting for user to sign a document over phonecall using BankID...\n\n")
 
 		req := bankid.CollectRequest{
 			OrderRef: phoneSignResponse.OrderRef,

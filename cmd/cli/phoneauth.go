@@ -74,7 +74,7 @@ var phoneAuthCommand = &cobra.Command{
 			log.Fatalf("PhoneAuth response error: : %v", err)
 		}
 
-		fmt.Printf("\n\nWaiting for user to phoneAuthenticate using BankID...\n\n")
+		fmt.Printf("\n\nWaiting for user to authenticate over phonecall using BankID...\n\n")
 
 		req := bankid.CollectRequest{
 			OrderRef: phoneAuthResponse.OrderRef,
