@@ -6,13 +6,12 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/nicolaa5/bankid"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCertPaths(t *testing.T) {
-	_, err := bankid.CertificateFromPath("../../certs/FPTestcert4_20230629.p12")
+	_, err := bankid.CertificateFromPath("../../certs/FPTestcert5_20240610.p12")
 	require.NoError(t, err)
 }
 
@@ -105,9 +104,9 @@ func TestErrorCodes(t *testing.T) {
 				require.True(t, ok)
 
 				//using non-existent orderRef
-				uniqueID := uuid.New()
+				fake_ref := "non-existent-order-ref"
 				_, err = b.Collect(ctx, bankid.CollectRequest{
-					OrderRef: uniqueID.String(),
+					OrderRef: fake_ref,
 				})
 				require.Error(t, err)
 
@@ -170,10 +169,6 @@ func TestErrorCodes(t *testing.T) {
 func randomIPv4() string {
 	num := func() int { return 2 + rand.Intn(254) }
 	return fmt.Sprintf("%d.%d.%d.%d", num(), num(), num(), num())
-}
-
-func randomNumber(min, max int) int {
-	return rand.Intn(max-min+1) + min
 }
 
 // from: https://github.com/emilybache/personnummer/blob/master/valid_100.txt
