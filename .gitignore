@@ -1,3 +1,4 @@
 .vscode
 **.p12
+!FPTestcert*.p12
 **.env
