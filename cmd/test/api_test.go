@@ -173,5 +173,5 @@ func randomIPv4() string {
 
 // from: https://github.com/emilybache/personnummer/blob/master/valid_100.txt
 func validPersonnummer() string {
-	return "193810260632"
+	return "3810260632"
 }
