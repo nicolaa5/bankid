@@ -11,6 +11,7 @@ import (
 // 2. Double Every Second Digit: Double the value of every second digit. If doubling results in a number greater than 9, subtract 9 from the result.
 // 3. Sum All Digits: Add together all the digits, including those not doubled.
 // 4. Calculate Modulo 10: The total sum modulo 10 should be 0 for a valid number.
+// Implementation from: https://github.com/neonxp/checksum/blob/master/luhn/luhn.go
 func validateChecksum(number string) error {
 	mod := len(number) % 2
 	sum := 0
