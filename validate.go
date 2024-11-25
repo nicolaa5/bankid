@@ -3,6 +3,7 @@ package bankid
 import (
 	"fmt"
 	"net"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -124,6 +125,21 @@ func validateCertificatePolicies(certificatePolicies []string) ValidateOption {
 
 func validatePersonalNumber(personalNumber string) ValidateOption {
 	return func() error {
+		if personalNumber == "" {
+			return InputInvalidError{Message: "Invalid personnummer, received an empty string"}
+		}
+		
+		// remove dash if provided
+		if strings.Contains(personalNumber, "-") {
+			personalNumber = strings.ReplaceAll(personalNumber, "-", "")
+		}
+
+		// assume that personal numbers of length: 12 are YYYYMMDD, format to YYMMDD
+		if len(personalNumber) == 12 {
+			personalNumber = personalNumber[2:]
+		}
+
+		// ensure checksum (kontrollsiffra - last digit) of the personal number is valid
 		err := validateChecksum(personalNumber)
 		if err != nil {
 			return InputInvalidError{Message: fmt.Sprintf("Personnummer: %s is not formatted correctly", personalNumber)}
