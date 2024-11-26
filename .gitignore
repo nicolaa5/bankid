@@ -1,2 +1,4 @@
 .vscode
-certs/*prod.p12
+**.p12
+!FPTestcert*.p12
+**.env

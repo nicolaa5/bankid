@@ -3,9 +3,8 @@ package bankid
 import (
 	"fmt"
 	"net"
+	"strings"
 	"unicode/utf8"
-
-	personnummer "github.com/personnummer/go/v3"
 )
 
 type ValidateOption func() error
@@ -78,7 +77,7 @@ func validateEndUserIP(endUserIP string) ValidateOption {
 func validateCallInitiator(callInitiator string) ValidateOption {
 	return func() error {
 		if callInitiator != "user" && callInitiator != "RP" {
-			return InputInvalidError{Message: fmt.Sprint("CallInitator is not formatted correctly, it should be 'user' or 'RP'")}
+			return InputInvalidError{Message: "CallInitator is not formatted correctly, it should be 'user' or 'RP'"}
 		}
 
 		return nil
@@ -88,7 +87,7 @@ func validateCallInitiator(callInitiator string) ValidateOption {
 func validateCardReader(cardReader string) ValidateOption {
 	return func() error {
 		if cardReader != "" && cardReader != "class1" && cardReader != "class2" {
-			return InputInvalidError{Message: fmt.Sprintf("CardReader input is invalid, it should be 'class1' or 'class2'")}
+			return InputInvalidError{Message: "CardReader input is invalid, it should be 'class1' or 'class2'"}
 		}
 
 		return nil
@@ -126,7 +125,23 @@ func validateCertificatePolicies(certificatePolicies []string) ValidateOption {
 
 func validatePersonalNumber(personalNumber string) ValidateOption {
 	return func() error {
-		if personalNumber != "" && !personnummer.Valid(personalNumber) {
+		if personalNumber == "" {
+			return InputInvalidError{Message: "Invalid personnummer, received an empty string"}
+		}
+		
+		// remove dash if provided
+		if strings.Contains(personalNumber, "-") {
+			personalNumber = strings.ReplaceAll(personalNumber, "-", "")
+		}
+
+		// assume that personal numbers of length: 12 are YYYYMMDD, format to YYMMDD
+		if len(personalNumber) == 12 {
+			personalNumber = personalNumber[2:]
+		}
+
+		// ensure checksum (kontrollsiffra - last digit) of the personal number is valid
+		err := validateChecksum(personalNumber)
+		if err != nil {
 			return InputInvalidError{Message: fmt.Sprintf("Personnummer: %s is not formatted correctly", personalNumber)}
 		}
 		return nil
@@ -151,21 +166,6 @@ func validateRequirement(requirement *Requirement) ValidateOption {
 			if err != nil {
 				return err
 			}
-		}
-
-		return nil
-	}
-}
-
-func validateParameters(p Config) ValidateOption {
-	return func() error {
-
-		if p.SSLCertificate == nil {
-			return InputInvalidError{Message: fmt.Sprint("ssl certificate is not provided")}
-		}
-
-		if p.CACertificate == nil {
-			return InputInvalidError{Message: fmt.Sprint("ca root certificate is not provided")}
 		}
 
 		return nil
