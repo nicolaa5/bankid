@@ -25,8 +25,21 @@ func (c *Config) UseDefault() {
 		c.Timeout = 5
 	}
 
-	// Use the BankID CA root certificate by default for requests
-	if c.CACertificate == nil && c.URL == BankIDURL {
-		c.CACertificate = CAProdCertificate
+	// Use the BankID CA root certificate for dev and prod scnearios by default for requests
+	if c.CA() == nil {
+		switch v := c.Certificate.(type) {
+		case P12Cert:
+			if c.URL == BankIDURL {
+				v.CACertificate = CAProdCertificate
+			} else if c.URL == BankIDTestUrl {
+				v.CACertificate = CATestCertificate
+			}
+		case PEMCert:
+			if c.URL == BankIDURL {
+				v.CACertificate = CAProdCertificate
+			} else if c.URL == BankIDTestUrl {
+				v.CACertificate = CATestCertificate
+			}
+		}
 	}
 }

@@ -16,9 +16,9 @@ You can use this repo if you're using BankID in your organization for one of the
 // Provide certificate and URL
 b, err := bankid.New(bankid.Config{
     URL: bankid.BankIDURL,
-    Certificate: bankid.Certificate{
+    Certificate: bankid.P12Certificate{
         Passphrase:     passphrase,
-        SSLCertificate: sslCert,
+        P12Certificate: p12Cert,
     },
 })
 
