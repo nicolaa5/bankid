@@ -10,19 +10,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCertPaths(t *testing.T) {
-	_, err := bankid.CertificateFromPath("../../certs/FPTestcert5_20240610.p12")
-	require.NoError(t, err)
-}
-
 func TestAuthenticate(t *testing.T) {
 	ctx := context.Background()
 
 	b, err := bankid.New(bankid.Config{
 		URL: bankid.BankIDTestUrl,
-		Certificate: bankid.Certificate{
+		Certificate: bankid.P12Cert{
 			Passphrase:     bankid.BankIDTestPassphrase,
-			SSLCertificate: bankid.SSLTestCertificate,
+			P12Certificate: bankid.P12TestCertificate,
 			CACertificate:  bankid.CATestCertificate,
 		},
 	})
@@ -71,9 +66,9 @@ func TestErrorCodes(t *testing.T) {
 
 	b, err := bankid.New(bankid.Config{
 		URL: bankid.BankIDTestUrl,
-		Certificate: bankid.Certificate{
+		Certificate: bankid.P12Cert{
 			Passphrase:     bankid.BankIDTestPassphrase,
-			SSLCertificate: bankid.SSLTestCertificate,
+			P12Certificate: bankid.P12TestCertificate,
 			CACertificate:  bankid.CATestCertificate,
 		},
 	})
@@ -145,9 +140,9 @@ func TestErrorCodes(t *testing.T) {
 				b, err := bankid.New(bankid.Config{
 					// add non-existent path to URL
 					URL: "https://appapi2.test.bankid.com/rp/v6.0/forbidden/path",
-					Certificate: bankid.Certificate{
+					Certificate: bankid.P12Cert{
 						Passphrase:     bankid.BankIDTestPassphrase,
-						SSLCertificate: bankid.SSLTestCertificate,
+						P12Certificate: bankid.P12TestCertificate,
 						CACertificate:  bankid.CATestCertificate,
 					},
 				})

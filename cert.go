@@ -3,7 +3,6 @@ package bankid
 import (
 	_ "embed"
 	"fmt"
-	"os"
 )
 
 var (
@@ -14,31 +13,35 @@ var (
 	CATestCertificate []byte
 
 	//go:embed certs/FPTestcert5_20240610.p12
-	SSLTestCertificate []byte
+	P12TestCertificate []byte
 )
 
-// This certificate is used to authenticate the RP service to the BankID API.
-type Certificate struct {
+// The certificate is used to authenticate the RP service to the BankID API.
+type Certificate interface {
+	String() string
+	Validate() error
+	CA() []byte
+}
+
+type P12Cert struct {
 	// Required: The password for your SSLCertificate
 	Passphrase string `json:"passphrase"`
 
-	// Required if SSLCertificatePath is not provided: Your organization's certificate signed by a trusted certificate authority (cert has .p12 extension).
+	// Required: Your organization's certificate signed by a trusted certificate authority (cert has .p12 extension).
 	// Provided by the bank (the trusted CA) that you sign an agreement with, see https://www.bankid.com/en/foretag/kontakt-foeretag
-	SSLCertificate []byte `json:"sslCertificate"`
+	P12Certificate []byte `json:"p12Certificate"`
 
-	// Optional: A CA root certificate. This lib has uses the BankID root certificate as the default
+	// Optional: A CA root certificate. This lib uses the BankID root certificate as the default
 	CACertificate []byte `json:"caCertificate"`
-
-	// Required if SSLCertificate is not provided: The path to your organization's certificate signed by a trusted certificate authority (cert has .p12 extension).
-	SSLCertificatePath string `json:"sslCertificatePath"`
-
-	// Optional: The path to the BankID root certificate
-	CACertificatePath string `json:"caCertificatePath"`
 }
 
-func (c Certificate) Validate() error {
-	if c.SSLCertificate == nil && c.SSLCertificatePath == "" {
-		return fmt.Errorf("ssl certificate and path are not provided")
+func (c P12Cert) String() string {
+	return string(c.P12Certificate)
+}
+
+func (c P12Cert) Validate() error {
+	if c.P12Certificate == nil {
+		return fmt.Errorf("ssl certificate is not provided")
 	}
 
 	if c.Passphrase == "" {
@@ -48,11 +51,35 @@ func (c Certificate) Validate() error {
 	return nil
 }
 
-func CertificateFromPath(path string) ([]byte, error) {
-	cert, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("error reading .p12 file: %w", err)
+func (c P12Cert) CA() []byte {
+	return c.CACertificate
+}
+
+type PEMCert struct {
+	PublicKey []byte `json:"publicKey"`
+
+	PrivateKey []byte `json:"privateKey"`
+
+	// Optional: A CA root certificate. This lib uses the BankID root certificate as the default
+	CACertificate []byte `json:"caCertificate"`
+}
+
+func (c PEMCert) String() string {
+	return string(c.PublicKey)
+}
+
+func (c PEMCert) Validate() error {
+	if c.PrivateKey == nil {
+		return fmt.Errorf("private key is not provided")
 	}
 
-	return cert, nil
+	if c.PublicKey == nil {
+		return fmt.Errorf("public key is not provided")
+	}
+
+	return nil
+}
+
+func (c PEMCert) CA() []byte {
+	return c.CACertificate
 }

@@ -136,9 +136,9 @@ func New(config Config) (BankID, error) {
 func NewTestDefault() (BankID, error) {
 	config := Config{
 		URL: BankIDTestUrl,
-		Certificate: Certificate{
+		Certificate: P12Cert{
 			Passphrase:     BankIDTestPassphrase,
-			SSLCertificate: SSLTestCertificate,
+			P12Certificate: P12TestCertificate,
 			CACertificate:  CATestCertificate,
 		},
 	}

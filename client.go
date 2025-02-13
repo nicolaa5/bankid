@@ -7,6 +7,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"net/http"
@@ -74,35 +75,25 @@ func request[T ResponseBody](ctx context.Context, p RequestParameters) (r *T, er
 }
 
 func newRequestConfig(params Config) (*RequestConfig, error) {
-	if params.SSLCertificate == nil {
-		sslCert, err := CertificateFromPath(params.SSLCertificatePath)
+	var cert *tls.Certificate
+	
+	switch v := params.Certificate.(type) {
+	case P12Cert:
+		c, err := decodeP12(v)
 		if err != nil {
-			return nil, fmt.Errorf("error getting ssl certificate from path: %w", err)
+			return nil, fmt.Errorf("decode P12 error: %w", err)
 		}
-		params.SSLCertificate = sslCert
-	}
-
-	if params.CACertificate == nil {
-		caCert, err := CertificateFromPath(params.CACertificatePath)
+		cert = c
+	case PEMCert:
+		c, err := decodePEM(v)
 		if err != nil {
-			return nil, fmt.Errorf("error getting ca certificate from path: %w", err)
+			return nil, fmt.Errorf("decode PEM error: %w", err)
 		}
-		params.CACertificate = caCert
-	}
-
-	// Decode the .p12 certificate into a private key and the certificate
-	key, cert, err := pkcs12.Decode(params.SSLCertificate, params.Passphrase)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding certificate: %w", err)
-	}
-
-	privateKey, ok := key.(crypto.PrivateKey)
-	if !ok {
-		return nil, fmt.Errorf("could not assert private key")
+		cert = c
 	}
 
 	certPool := x509.NewCertPool()
-	ok = certPool.AppendCertsFromPEM(params.CACertificate)
+	ok := certPool.AppendCertsFromPEM(params.CA())
 	if !ok {
 		return nil, fmt.Errorf("could not append root certificate to pool")
 	}
@@ -111,11 +102,7 @@ func newRequestConfig(params Config) (*RequestConfig, error) {
 	tlsConfig := &tls.Config{
 		RootCAs: certPool,
 		Certificates: []tls.Certificate{
-			{
-				Certificate: [][]byte{cert.Raw},
-				PrivateKey:  privateKey,
-				Leaf:        cert,
-			},
+			*cert,
 		},
 	}
 
@@ -131,4 +118,55 @@ func newRequestConfig(params Config) (*RequestConfig, error) {
 		UrlBase: params.URL,
 		Client:  client,
 	}, nil
+}
+
+// PEM format for BankID is the .p12 converted to .pem using
+func decodePEM(c PEMCert) (*tls.Certificate, error) {
+	certBlock, _ := pem.Decode(c.PublicKey)
+	if certBlock == nil || certBlock.Type != "CERTIFICATE" {
+		return nil, fmt.Errorf("failed to decode PEM block containing certificate")
+	}
+
+	keyBlock, _ := pem.Decode(c.PrivateKey[len(certBlock.Bytes):])
+	if keyBlock == nil || keyBlock.Type != "PRIVATE KEY" {
+		return nil, fmt.Errorf("failed to decode PEM block containing private key")
+	}
+
+	x509Cert, err := x509.ParseCertificate(certBlock.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing certificate: %w", err)
+	}
+
+	privateKey, err := x509.ParsePKCS8PrivateKey(keyBlock.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing private key: %w", err)
+	}
+
+	cert := &tls.Certificate{
+		Certificate: [][]byte{x509Cert.Raw},
+		PrivateKey:  privateKey,
+		Leaf:        x509Cert,
+	}
+
+	return cert, nil
+}
+
+func decodeP12(c P12Cert) (*tls.Certificate, error) {
+	key, x509Cert, err := pkcs12.Decode(c.P12Certificate, c.Passphrase)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding P12 certificate: %w", err)
+	}
+
+	privateKey, ok := key.(crypto.PrivateKey)
+	if !ok {
+		return nil, fmt.Errorf("could not assert private key")
+	}
+
+	cert := tls.Certificate{
+		Certificate: [][]byte{x509Cert.Raw},
+		PrivateKey:  privateKey,
+		Leaf:        x509Cert,
+	}
+
+	return &cert, nil
 }
