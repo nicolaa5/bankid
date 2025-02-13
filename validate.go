@@ -128,7 +128,7 @@ func validatePersonalNumber(personalNumber string) ValidateOption {
 		if personalNumber == "" {
 			return InputInvalidError{Message: "Invalid personnummer, received an empty string"}
 		}
-		
+
 		// remove dash if provided
 		if strings.Contains(personalNumber, "-") {
 			personalNumber = strings.ReplaceAll(personalNumber, "-", "")

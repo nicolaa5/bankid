@@ -13,27 +13,43 @@ import (
 func TestAuthenticate(t *testing.T) {
 	ctx := context.Background()
 
-	b, err := bankid.New(bankid.Config{
+	p12Config, err := bankid.New(bankid.Config{
 		URL: bankid.BankIDTestUrl,
 		Certificate: bankid.P12Cert{
-			Passphrase:     bankid.BankIDTestPassphrase,
-			P12Certificate: bankid.P12TestCertificate,
-			CACertificate:  bankid.CATestCertificate,
+			Passphrase:    bankid.BankIDTestPassphrase,
+			Certificate:   bankid.P12TestCertificate,
+			CACertificate: bankid.CATestCertificate,
+		},
+	})
+	require.NoError(t, err)
+
+	pemConfig, err := bankid.New(bankid.Config{
+		URL: bankid.BankIDTestUrl,
+		Certificate: bankid.PEMCert{
+			Certificate:   bankid.PEMTestCertificate,
+			Passphrase:    bankid.BankIDTestPassphrase,
+			CACertificate: bankid.CATestCertificate,
 		},
 	})
 	require.NoError(t, err)
 
 	for _, tt := range []struct {
-		name string
+		name   string
+		client bankid.BankID
 	}{
 		{
-			name: "Authenticate, collect, cancel",
+			name:   "Authenticate, collect, cancel - using .p12 cert",
+			client: p12Config,
+		},
+		{
+			name:   "Authenticate, collect, cancel - using .pem cert",
+			client: pemConfig,
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			authResponse, err := b.Auth(ctx, bankid.AuthRequest{
+			authResponse, err := tt.client.Auth(ctx, bankid.AuthRequest{
 				EndUserIP: randomIPv4(),
 			})
 
@@ -43,7 +59,7 @@ func TestAuthenticate(t *testing.T) {
 			require.NotEmpty(t, authResponse.QrStartSecret)
 			require.NotEmpty(t, authResponse.QrStartToken)
 
-			collectResponse, err := b.Collect(ctx, bankid.CollectRequest{
+			collectResponse, err := tt.client.Collect(ctx, bankid.CollectRequest{
 				OrderRef: authResponse.OrderRef,
 			})
 
@@ -52,7 +68,7 @@ func TestAuthenticate(t *testing.T) {
 			require.Equal(t, collectResponse.Status, bankid.Pending)
 			require.Equal(t, collectResponse.HintCode, bankid.OutstandingTransaction)
 
-			_, err = b.Cancel(ctx, bankid.CancelRequest{
+			_, err = tt.client.Cancel(ctx, bankid.CancelRequest{
 				OrderRef: authResponse.OrderRef,
 			})
 
@@ -67,9 +83,9 @@ func TestErrorCodes(t *testing.T) {
 	b, err := bankid.New(bankid.Config{
 		URL: bankid.BankIDTestUrl,
 		Certificate: bankid.P12Cert{
-			Passphrase:     bankid.BankIDTestPassphrase,
-			P12Certificate: bankid.P12TestCertificate,
-			CACertificate:  bankid.CATestCertificate,
+			Passphrase:    bankid.BankIDTestPassphrase,
+			Certificate:   bankid.P12TestCertificate,
+			CACertificate: bankid.CATestCertificate,
 		},
 	})
 	require.NoError(t, err)
@@ -141,9 +157,9 @@ func TestErrorCodes(t *testing.T) {
 					// add non-existent path to URL
 					URL: "https://appapi2.test.bankid.com/rp/v6.0/forbidden/path",
 					Certificate: bankid.P12Cert{
-						Passphrase:     bankid.BankIDTestPassphrase,
-						P12Certificate: bankid.P12TestCertificate,
-						CACertificate:  bankid.CATestCertificate,
+						Passphrase:    bankid.BankIDTestPassphrase,
+						Certificate:   bankid.P12TestCertificate,
+						CACertificate: bankid.CATestCertificate,
 					},
 				})
 				require.NoError(t, err)

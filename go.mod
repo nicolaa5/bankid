@@ -11,5 +11,6 @@ require (
 
 require (
 	github.com/stretchr/testify v1.9.0
+	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78
 	software.sslmate.com/src/go-pkcs12 v0.5.0
 )
