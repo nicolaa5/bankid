@@ -33,6 +33,9 @@ type AuthRequest struct {
 	// will potentially make the text displayed to the user nicer to look at.
 	// For instructions check out https://www.bankid.com/utvecklare/guider/formatera-text
 	UserVisibleDataFormat string `json:"userVisibleDataFormat,omitempty"`
+
+	// Optional: Orders started on the same device as where the user's BankID is stored (started with autostart token) will call this URL when the order is completed.
+	ReturnUrl string `json:"returnUrl,omitempty"`
 }
 
 func (r AuthRequest) Marshal() ([]byte, error) {
