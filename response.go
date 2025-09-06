@@ -1,6 +1,9 @@
 package bankid
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // ResponseBody is an interface for all successfull BankID responses.
 type ResponseBody interface {
@@ -93,6 +96,15 @@ type CollectResponse struct {
 
 func (r CollectResponse) Unmarshal(data []byte) error {
 	return json.Unmarshal(data, &r)
+}
+
+func (r CollectResponse) String() string {
+	data, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		fmt.Printf("Error marshaling CollectResponse: %v", err.Error())
+		return "{}"
+	}
+	return string(data)
 }
 
 type User struct {
